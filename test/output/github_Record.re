@@ -3261,11 +3261,7 @@ module MakeSchema = (Config: SchemaConfig) => {
     type t = {
       [@bs.optional]
       codeOfConduct:
-        rootResolver(
-          {. "key": string},
-          codeOfConduct,
-          Js.Nullable.t(codeOfConduct),
-        ),
+        rootResolver(key, codeOfConduct, Js.Nullable.t(codeOfConduct)),
       [@bs.optional]
       codesOfConduct:
         rootResolver(
@@ -3274,133 +3270,94 @@ module MakeSchema = (Config: SchemaConfig) => {
           Js.Nullable.t(array(Js.Nullable.t(codeOfConduct))),
         ),
       [@bs.optional]
-      license:
-        rootResolver({. "key": string}, license, Js.Nullable.t(license)),
+      license: rootResolver(key, license, Js.Nullable.t(license)),
       [@bs.optional]
       licenses: rootResolver(unit, license, array(Js.Nullable.t(license))),
       [@bs.optional]
       marketplaceCategories:
         rootResolver(
-          {
-            .
-            "excludeEmpty": Js.Nullable.t(bool),
-            "excludeSubcategories": Js.Nullable.t(bool),
-            "includeCategories": Js.Nullable.t(array(string)),
-          },
+          excludeEmpty,
+          excludeSubcategories,
+          includeCategories,
           marketplaceCategory,
           array(marketplaceCategory),
         ),
       [@bs.optional]
       marketplaceCategory:
         rootResolver(
-          {
-            .
-            "slug": string,
-            "useTopicAliases": Js.Nullable.t(bool),
-          },
+          slug,
+          useTopicAliases,
           marketplaceCategory,
           Js.Nullable.t(marketplaceCategory),
         ),
       [@bs.optional]
       marketplaceListing:
         rootResolver(
-          {. "slug": string},
+          slug,
           marketplaceListing,
           Js.Nullable.t(marketplaceListing),
         ),
       [@bs.optional]
       marketplaceListings:
         rootResolver(
-          {
-            .
-            "adminId": Js.Nullable.t(string),
-            "after": Js.Nullable.t(string),
-            "allStates": Js.Nullable.t(bool),
-            "before": Js.Nullable.t(string),
-            "categorySlug": Js.Nullable.t(string),
-            "first": Js.Nullable.t(int),
-            "last": Js.Nullable.t(int),
-            "organizationId": Js.Nullable.t(string),
-            "primaryCategoryOnly": Js.Nullable.t(bool),
-            "slugs": Js.Nullable.t(array(Js.Nullable.t(string))),
-            "useTopicAliases": Js.Nullable.t(bool),
-            "viewerCanAdmin": Js.Nullable.t(bool),
-            "withFreeTrialsOnly": Js.Nullable.t(bool),
-          },
+          adminId,
+          after,
+          allStates,
+          before,
+          categorySlug,
+          first,
+          last,
+          organizationId,
+          primaryCategoryOnly,
+          slugs,
+          useTopicAliases,
+          viewerCanAdmin,
+          withFreeTrialsOnly,
           marketplaceListingConnection,
           marketplaceListingConnection,
         ),
       [@bs.optional]
       meta: rootResolver(unit, gitHubMetadata, gitHubMetadata),
       [@bs.optional]
-      node: rootResolver({. "id": string}, node, Js.Nullable.t(node)),
+      node: rootResolver(id, node, Js.Nullable.t(node)),
       [@bs.optional]
-      nodes:
-        rootResolver(
-          {. "ids": array(string)},
-          node,
-          array(Js.Nullable.t(node)),
-        ),
+      nodes: rootResolver(ids, node, array(Js.Nullable.t(node))),
       [@bs.optional]
       organization:
-        rootResolver(
-          {. "login": string},
-          organization,
-          Js.Nullable.t(organization),
-        ),
+        rootResolver(login, organization, Js.Nullable.t(organization)),
       [@bs.optional]
-      rateLimit:
-        rootResolver(
-          {. "dryRun": Js.Nullable.t(bool)},
-          rateLimit,
-          Js.Nullable.t(rateLimit),
-        ),
+      rateLimit: rootResolver(dryRun, rateLimit, Js.Nullable.t(rateLimit)),
       [@bs.optional]
       relay: rootResolver(unit, query, query),
       [@bs.optional]
       repository:
-        rootResolver(
-          {
-            .
-            "name": string,
-            "owner": string,
-          },
-          repository,
-          Js.Nullable.t(repository),
-        ),
+        rootResolver(name, owner, repository, Js.Nullable.t(repository)),
       [@bs.optional]
       repositoryOwner:
-        rootResolver(
-          {. "login": string},
-          repositoryOwner,
-          Js.Nullable.t(repositoryOwner),
-        ),
+        rootResolver(login, repositoryOwner, Js.Nullable.t(repositoryOwner)),
       [@bs.optional]
       resource:
         rootResolver(
-          {. "url": uRI},
+          url,
           uniformResourceLocatable,
           Js.Nullable.t(uniformResourceLocatable),
         ),
       [@bs.optional]
       search:
         rootResolver(
-          {
-            .
-            "after": Js.Nullable.t(string),
-            "before": Js.Nullable.t(string),
-            "first": Js.Nullable.t(int),
-            "last": Js.Nullable.t(int),
-            "query": string,
-            "type": abs_searchType,
-          },
+          after,
+          before,
+          first,
+          last,
+          query,
+          type_,
           searchResultItemConnection,
           searchResultItemConnection,
         ),
       [@bs.optional]
-      topic: rootResolver({. "name": string}, topic, Js.Nullable.t(topic)),
+      topic: rootResolver(name, topic, Js.Nullable.t(topic)),
       [@bs.optional]
-      user: rootResolver({. "login": string}, user, Js.Nullable.t(user)),
+      user: rootResolver(login, user, Js.Nullable.t(user)),
       [@bs.optional]
       viewer: rootResolver(unit, user, user),
     };
@@ -3411,238 +3368,234 @@ module MakeSchema = (Config: SchemaConfig) => {
       [@bs.optional]
       acceptTopicSuggestion:
         rootResolver(
-          {. "input": acceptTopicSuggestionInput},
+          input,
           acceptTopicSuggestionPayload,
           Js.Nullable.t(acceptTopicSuggestionPayload),
         ),
       [@bs.optional]
       addComment:
         rootResolver(
-          {. "input": addCommentInput},
+          input,
           addCommentPayload,
           Js.Nullable.t(addCommentPayload),
         ),
       [@bs.optional]
       addProjectCard:
         rootResolver(
-          {. "input": addProjectCardInput},
+          input,
           addProjectCardPayload,
           Js.Nullable.t(addProjectCardPayload),
         ),
       [@bs.optional]
       addProjectColumn:
         rootResolver(
-          {. "input": addProjectColumnInput},
+          input,
           addProjectColumnPayload,
           Js.Nullable.t(addProjectColumnPayload),
         ),
       [@bs.optional]
       addPullRequestReview:
         rootResolver(
-          {. "input": addPullRequestReviewInput},
+          input,
           addPullRequestReviewPayload,
           Js.Nullable.t(addPullRequestReviewPayload),
         ),
       [@bs.optional]
       addPullRequestReviewComment:
         rootResolver(
-          {. "input": addPullRequestReviewCommentInput},
+          input,
           addPullRequestReviewCommentPayload,
           Js.Nullable.t(addPullRequestReviewCommentPayload),
         ),
       [@bs.optional]
       addReaction:
         rootResolver(
-          {. "input": addReactionInput},
+          input,
           addReactionPayload,
           Js.Nullable.t(addReactionPayload),
         ),
       [@bs.optional]
       addStar:
-        rootResolver(
-          {. "input": addStarInput},
-          addStarPayload,
-          Js.Nullable.t(addStarPayload),
-        ),
+        rootResolver(input, addStarPayload, Js.Nullable.t(addStarPayload)),
       [@bs.optional]
       createBranchProtectionRule:
         rootResolver(
-          {. "input": createBranchProtectionRuleInput},
+          input,
           createBranchProtectionRulePayload,
           Js.Nullable.t(createBranchProtectionRulePayload),
         ),
       [@bs.optional]
       createProject:
         rootResolver(
-          {. "input": createProjectInput},
+          input,
           createProjectPayload,
           Js.Nullable.t(createProjectPayload),
         ),
       [@bs.optional]
       declineTopicSuggestion:
         rootResolver(
-          {. "input": declineTopicSuggestionInput},
+          input,
           declineTopicSuggestionPayload,
           Js.Nullable.t(declineTopicSuggestionPayload),
         ),
       [@bs.optional]
       deleteBranchProtectionRule:
         rootResolver(
-          {. "input": deleteBranchProtectionRuleInput},
+          input,
           deleteBranchProtectionRulePayload,
           Js.Nullable.t(deleteBranchProtectionRulePayload),
         ),
       [@bs.optional]
       deleteProject:
         rootResolver(
-          {. "input": deleteProjectInput},
+          input,
           deleteProjectPayload,
           Js.Nullable.t(deleteProjectPayload),
         ),
       [@bs.optional]
       deleteProjectCard:
         rootResolver(
-          {. "input": deleteProjectCardInput},
+          input,
           deleteProjectCardPayload,
           Js.Nullable.t(deleteProjectCardPayload),
         ),
       [@bs.optional]
       deleteProjectColumn:
         rootResolver(
-          {. "input": deleteProjectColumnInput},
+          input,
           deleteProjectColumnPayload,
           Js.Nullable.t(deleteProjectColumnPayload),
         ),
       [@bs.optional]
       deletePullRequestReview:
         rootResolver(
-          {. "input": deletePullRequestReviewInput},
+          input,
           deletePullRequestReviewPayload,
           Js.Nullable.t(deletePullRequestReviewPayload),
         ),
       [@bs.optional]
       dismissPullRequestReview:
         rootResolver(
-          {. "input": dismissPullRequestReviewInput},
+          input,
           dismissPullRequestReviewPayload,
           Js.Nullable.t(dismissPullRequestReviewPayload),
         ),
       [@bs.optional]
       lockLockable:
         rootResolver(
-          {. "input": lockLockableInput},
+          input,
           lockLockablePayload,
           Js.Nullable.t(lockLockablePayload),
         ),
       [@bs.optional]
       moveProjectCard:
         rootResolver(
-          {. "input": moveProjectCardInput},
+          input,
           moveProjectCardPayload,
           Js.Nullable.t(moveProjectCardPayload),
         ),
       [@bs.optional]
       moveProjectColumn:
         rootResolver(
-          {. "input": moveProjectColumnInput},
+          input,
           moveProjectColumnPayload,
           Js.Nullable.t(moveProjectColumnPayload),
         ),
       [@bs.optional]
       removeOutsideCollaborator:
         rootResolver(
-          {. "input": removeOutsideCollaboratorInput},
+          input,
           removeOutsideCollaboratorPayload,
           Js.Nullable.t(removeOutsideCollaboratorPayload),
         ),
       [@bs.optional]
       removeReaction:
         rootResolver(
-          {. "input": removeReactionInput},
+          input,
           removeReactionPayload,
           Js.Nullable.t(removeReactionPayload),
         ),
       [@bs.optional]
       removeStar:
         rootResolver(
-          {. "input": removeStarInput},
+          input,
           removeStarPayload,
           Js.Nullable.t(removeStarPayload),
         ),
       [@bs.optional]
       requestReviews:
         rootResolver(
-          {. "input": requestReviewsInput},
+          input,
           requestReviewsPayload,
           Js.Nullable.t(requestReviewsPayload),
         ),
       [@bs.optional]
       submitPullRequestReview:
         rootResolver(
-          {. "input": submitPullRequestReviewInput},
+          input,
           submitPullRequestReviewPayload,
           Js.Nullable.t(submitPullRequestReviewPayload),
         ),
       [@bs.optional]
       unlockLockable:
         rootResolver(
-          {. "input": unlockLockableInput},
+          input,
           unlockLockablePayload,
           Js.Nullable.t(unlockLockablePayload),
         ),
       [@bs.optional]
       updateBranchProtectionRule:
         rootResolver(
-          {. "input": updateBranchProtectionRuleInput},
+          input,
           updateBranchProtectionRulePayload,
           Js.Nullable.t(updateBranchProtectionRulePayload),
         ),
       [@bs.optional]
       updateProject:
         rootResolver(
-          {. "input": updateProjectInput},
+          input,
           updateProjectPayload,
           Js.Nullable.t(updateProjectPayload),
         ),
       [@bs.optional]
       updateProjectCard:
         rootResolver(
-          {. "input": updateProjectCardInput},
+          input,
           updateProjectCardPayload,
           Js.Nullable.t(updateProjectCardPayload),
         ),
       [@bs.optional]
       updateProjectColumn:
         rootResolver(
-          {. "input": updateProjectColumnInput},
+          input,
           updateProjectColumnPayload,
           Js.Nullable.t(updateProjectColumnPayload),
         ),
       [@bs.optional]
       updatePullRequestReview:
         rootResolver(
-          {. "input": updatePullRequestReviewInput},
+          input,
           updatePullRequestReviewPayload,
           Js.Nullable.t(updatePullRequestReviewPayload),
         ),
       [@bs.optional]
       updatePullRequestReviewComment:
         rootResolver(
-          {. "input": updatePullRequestReviewCommentInput},
+          input,
           updatePullRequestReviewCommentPayload,
           Js.Nullable.t(updatePullRequestReviewCommentPayload),
         ),
       [@bs.optional]
       updateSubscription:
         rootResolver(
-          {. "input": updateSubscriptionInput},
+          input,
           updateSubscriptionPayload,
           Js.Nullable.t(updateSubscriptionPayload),
         ),
       [@bs.optional]
       updateTopics:
         rootResolver(
-          {. "input": updateTopicsInput},
+          input,
           updateTopicsPayload,
           Js.Nullable.t(updateTopicsPayload),
         ),

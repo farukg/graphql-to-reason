@@ -11,3 +11,6 @@ esy.lock
 test/fixtures/*.graphql.json
 test/lib
 test/output/*.bs.js
+.history
+.vscode
+.idea

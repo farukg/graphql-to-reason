@@ -44,13 +44,31 @@ let fromFile =
         let%map_open filepath = anon("filepath" %: json_file_path)
         and outputFiles = anon(sequence("output_path" %: file));
         () => {
-          let result =
-            Lib.(
-              SchemaRead.File(filepath)
-              |> SchemaRead.read
-              |> SchemaPrint.print
+          let resultRead = Lib.(SchemaRead.File(filepath) |> SchemaRead.read);
+          let result = Lib.(resultRead |> SchemaPrint.print);
+          let result2 = Lib.(resultRead |> SchemaPrintJsT.print);
+          // let resultRecord = Lib.(resultRead |> SchemaPrintRecord.print);
+          let out2 =
+            List.map(
+              outputFiles,
+              i => {
+                let len = String.length(i);
+                let rr = String.sub(i, 0, len - 3);
+                rr ++ "_JsT.re";
+              },
             );
+          // let out3 =
+          //   List.map(
+          //     outputFiles,
+          //     i => {
+          //       let len = String.length(i);
+          //       let rr = String.sub(i, 0, len - 3);
+          //       rr ++ "_Record.re";
+          //     },
+          //   );
           output(~outputFiles, ~result);
+          output(~outputFiles=out2, ~result=result2);
+          // output(~outputFiles=out3, ~result=resultRecord);
         };
       },
     )

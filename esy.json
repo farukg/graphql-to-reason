@@ -4,8 +4,7 @@
   "description": "Converts graphql schema to reason types",
   "license": "MIT",
   "scripts": {
-    "watch":
-      "nodemon -e re -q -w ./lib/ -w ./graphql-to-reason.re --exec 'esy build'",
+    "watch": "nodemon -e re -q -w ./lib/ -w ./graphql-to-reason.re --exec 'esy build'",
     "test": "make test"
   },
   "esy": {
@@ -13,18 +12,25 @@
     "buildsInSource": "_build"
   },
   "dependencies": {
-    "@esy-ocaml/reason": "3.3.7",
+    "@esy-ocaml/reason": "3.5.x",
     "@opam/core": "v0.11.3",
-    "@opam/dune": "*",
-    "@opam/ocaml-migrate-parsetree": "*",
+    "@opam/dune": "2.5.1",
+    "@opam/ocaml-migrate-parsetree": "1.7.3",
     "@opam/ppx_tools": "5.1+4.06.0",
-    "@opam/ppx_tools_versioned": "*",
+    "@opam/ppx_tools_versioned": "5.4.0",
     "@opam/yojson": "*",
+    "graphql": "^15.1.0",
+    "graphql-tools": "^6.0.9",
     "ocaml": "~4.6.0",
-    "refmterr": "*",
-    "graphql": "^14.0.0",
-    "graphql-tools": "^4.0.3"
+    "refmterr": "^3.3.2",
+    "@opam/ocaml-lsp-server": "ocaml/ocaml-lsp:ocaml-lsp-server.opam"
   },
-  "resolutions": { "@opam/menhir": "20171013" },
-  "devDependencies": { "@esy-ocaml/merlin": "*" }
+  "resolutions": {
+    "@opam/menhir": "20200211",
+    "@opam/menhirLib": "20200211",
+    "@opam/menhirSdk": "20200211"
+  },
+  "devDependencies": {
+    "@esy-ocaml/merlin": "*"
+  }
 }

@@ -138,340 +138,385 @@ module MakeSchema = (Config: SchemaConfig) => {
     | [@bs.as "user_identity_type_pkey"] `user_identity_type_pkey
   ];
   type timestamptz_comparison_exp = {
-    _eq: Js.Nullable.t(timestamptz),
-    _gt: Js.Nullable.t(timestamptz),
-    _gte: Js.Nullable.t(timestamptz),
-    _in: Js.Nullable.t(array(Js.Nullable.t(timestamptz))),
-    _is_null: Js.Nullable.t(bool),
-    _lt: Js.Nullable.t(timestamptz),
-    _lte: Js.Nullable.t(timestamptz),
-    _neq: Js.Nullable.t(timestamptz),
-    _nin: Js.Nullable.t(array(Js.Nullable.t(timestamptz))),
+    .
+    "_eq": Js.Nullable.t(timestamptz),
+    "_gt": Js.Nullable.t(timestamptz),
+    "_gte": Js.Nullable.t(timestamptz),
+    "_in": Js.Nullable.t(array(Js.Nullable.t(timestamptz))),
+    "_is_null": Js.Nullable.t(bool),
+    "_lt": Js.Nullable.t(timestamptz),
+    "_lte": Js.Nullable.t(timestamptz),
+    "_neq": Js.Nullable.t(timestamptz),
+    "_nin": Js.Nullable.t(array(Js.Nullable.t(timestamptz))),
   }
-  and note_prepend_input = {data: Js.Nullable.t(jsonb)}
+  and note_prepend_input = {. "data": Js.Nullable.t(jsonb)}
   and user_identity_type_set_input = {
-    user_identity_type: Js.Nullable.t(string),
+    .
+    "user_identity_type": Js.Nullable.t(string),
   }
   and user_identity_type_bool_exp = {
-    _and: Js.Nullable.t(array(Js.Nullable.t(user_identity_type_bool_exp))),
-    _not: Js.Nullable.t(user_identity_type_bool_exp),
-    _or: Js.Nullable.t(array(Js.Nullable.t(user_identity_type_bool_exp))),
-    user_identity_type: Js.Nullable.t(varchar_comparison_exp),
+    .
+    "_and":
+      Js.Nullable.t(array(Js.Nullable.t(user_identity_type_bool_exp))),
+    "_not": Js.Nullable.t(user_identity_type_bool_exp),
+    "_or": Js.Nullable.t(array(Js.Nullable.t(user_identity_type_bool_exp))),
+    "user_identity_type": Js.Nullable.t(varchar_comparison_exp),
   }
-  and note_revision_delete_key_input = {data: Js.Nullable.t(string)}
+  and note_revision_delete_key_input = {. "data": Js.Nullable.t(string)}
   and note_revision_delete_at_path_input = {
-    data: Js.Nullable.t(array(Js.Nullable.t(string))),
+    .
+    "data": Js.Nullable.t(array(Js.Nullable.t(string))),
   }
   and note_revision_on_conflict = {
-    action: conflict_action,
-    constraint_: Js.Nullable.t(note_revision_constraint),
+    .
+    "action": abs_conflict_action,
+    "constraint": Js.Nullable.t(abs_note_revision_constraint),
   }
-  and note_delete_key_input = {data: Js.Nullable.t(string)}
+  and note_delete_key_input = {. "data": Js.Nullable.t(string)}
   and user_identity_insert_input = {
-    data: Js.Nullable.t(jsonb),
-    identity_id: Js.Nullable.t(string),
-    identity_type: Js.Nullable.t(string),
-    user_id: Js.Nullable.t(string),
+    .
+    "data": Js.Nullable.t(jsonb),
+    "identity_id": Js.Nullable.t(string),
+    "identity_type": Js.Nullable.t(string),
+    "user_id": Js.Nullable.t(string),
   }
   and user_identity_on_conflict = {
-    action: conflict_action,
-    constraint_: Js.Nullable.t(user_identity_constraint),
+    .
+    "action": abs_conflict_action,
+    "constraint": Js.Nullable.t(abs_user_identity_constraint),
   }
   and note_revision_set_input = {
-    created_at: Js.Nullable.t(timestamptz),
-    data: Js.Nullable.t(jsonb),
-    note_id: Js.Nullable.t(string),
-    title: Js.Nullable.t(string),
+    .
+    "created_at": Js.Nullable.t(timestamptz),
+    "data": Js.Nullable.t(jsonb),
+    "note_id": Js.Nullable.t(string),
+    "title": Js.Nullable.t(string),
   }
   and note_on_conflict = {
-    action: conflict_action,
-    constraint_: Js.Nullable.t(note_constraint),
+    .
+    "action": abs_conflict_action,
+    "constraint": Js.Nullable.t(abs_note_constraint),
   }
   and jsonb_comparison_exp = {
-    _eq: Js.Nullable.t(jsonb),
-    _gt: Js.Nullable.t(jsonb),
-    _gte: Js.Nullable.t(jsonb),
-    _in: Js.Nullable.t(array(Js.Nullable.t(jsonb))),
-    _is_null: Js.Nullable.t(bool),
-    _lt: Js.Nullable.t(jsonb),
-    _lte: Js.Nullable.t(jsonb),
-    _neq: Js.Nullable.t(jsonb),
-    _nin: Js.Nullable.t(array(Js.Nullable.t(jsonb))),
+    .
+    "_eq": Js.Nullable.t(jsonb),
+    "_gt": Js.Nullable.t(jsonb),
+    "_gte": Js.Nullable.t(jsonb),
+    "_in": Js.Nullable.t(array(Js.Nullable.t(jsonb))),
+    "_is_null": Js.Nullable.t(bool),
+    "_lt": Js.Nullable.t(jsonb),
+    "_lte": Js.Nullable.t(jsonb),
+    "_neq": Js.Nullable.t(jsonb),
+    "_nin": Js.Nullable.t(array(Js.Nullable.t(jsonb))),
   }
   and user_identity_delete_at_path_input = {
-    data: Js.Nullable.t(array(Js.Nullable.t(string))),
+    .
+    "data": Js.Nullable.t(array(Js.Nullable.t(string))),
   }
   and user_set_input = {
-    avatar: Js.Nullable.t(string),
-    created_at: Js.Nullable.t(timestamptz),
-    email: Js.Nullable.t(string),
-    id: Js.Nullable.t(string),
-    name: Js.Nullable.t(string),
-    updated_at: Js.Nullable.t(timestamptz),
-    username: Js.Nullable.t(string),
+    .
+    "avatar": Js.Nullable.t(string),
+    "created_at": Js.Nullable.t(timestamptz),
+    "email": Js.Nullable.t(string),
+    "id": Js.Nullable.t(string),
+    "name": Js.Nullable.t(string),
+    "updated_at": Js.Nullable.t(timestamptz),
+    "username": Js.Nullable.t(string),
   }
-  and note_revision_prepend_input = {data: Js.Nullable.t(jsonb)}
-  and note_append_input = {data: Js.Nullable.t(jsonb)}
+  and note_revision_prepend_input = {. "data": Js.Nullable.t(jsonb)}
+  and note_append_input = {. "data": Js.Nullable.t(jsonb)}
   and user_identity_bool_exp = {
-    _and: Js.Nullable.t(array(Js.Nullable.t(user_identity_bool_exp))),
-    _not: Js.Nullable.t(user_identity_bool_exp),
-    _or: Js.Nullable.t(array(Js.Nullable.t(user_identity_bool_exp))),
-    data: Js.Nullable.t(jsonb_comparison_exp),
-    identity_id: Js.Nullable.t(varchar_comparison_exp),
-    identity_type: Js.Nullable.t(varchar_comparison_exp),
-    user: Js.Nullable.t(user_bool_exp),
-    user_id: Js.Nullable.t(varchar_comparison_exp),
+    .
+    "_and": Js.Nullable.t(array(Js.Nullable.t(user_identity_bool_exp))),
+    "_not": Js.Nullable.t(user_identity_bool_exp),
+    "_or": Js.Nullable.t(array(Js.Nullable.t(user_identity_bool_exp))),
+    "data": Js.Nullable.t(jsonb_comparison_exp),
+    "identity_id": Js.Nullable.t(varchar_comparison_exp),
+    "identity_type": Js.Nullable.t(varchar_comparison_exp),
+    "user": Js.Nullable.t(user_bool_exp),
+    "user_id": Js.Nullable.t(varchar_comparison_exp),
   }
   and user_insert_input = {
-    avatar: Js.Nullable.t(string),
-    created_at: Js.Nullable.t(timestamptz),
-    email: Js.Nullable.t(string),
-    id: Js.Nullable.t(string),
-    name: Js.Nullable.t(string),
-    updated_at: Js.Nullable.t(timestamptz),
-    username: Js.Nullable.t(string),
+    .
+    "avatar": Js.Nullable.t(string),
+    "created_at": Js.Nullable.t(timestamptz),
+    "email": Js.Nullable.t(string),
+    "id": Js.Nullable.t(string),
+    "name": Js.Nullable.t(string),
+    "updated_at": Js.Nullable.t(timestamptz),
+    "username": Js.Nullable.t(string),
   }
   and note_insert_input = {
-    created_at: Js.Nullable.t(timestamptz),
-    data: Js.Nullable.t(jsonb),
-    id: Js.Nullable.t(string),
-    title: Js.Nullable.t(string),
-    updated_at: Js.Nullable.t(timestamptz),
-    user_id: Js.Nullable.t(string),
+    .
+    "created_at": Js.Nullable.t(timestamptz),
+    "data": Js.Nullable.t(jsonb),
+    "id": Js.Nullable.t(string),
+    "title": Js.Nullable.t(string),
+    "updated_at": Js.Nullable.t(timestamptz),
+    "user_id": Js.Nullable.t(string),
   }
-  and user_identity_delete_elem_input = {data: Js.Nullable.t(int)}
+  and user_identity_delete_elem_input = {. "data": Js.Nullable.t(int)}
   and note_set_input = {
-    created_at: Js.Nullable.t(timestamptz),
-    data: Js.Nullable.t(jsonb),
-    id: Js.Nullable.t(string),
-    title: Js.Nullable.t(string),
-    updated_at: Js.Nullable.t(timestamptz),
-    user_id: Js.Nullable.t(string),
+    .
+    "created_at": Js.Nullable.t(timestamptz),
+    "data": Js.Nullable.t(jsonb),
+    "id": Js.Nullable.t(string),
+    "title": Js.Nullable.t(string),
+    "updated_at": Js.Nullable.t(timestamptz),
+    "user_id": Js.Nullable.t(string),
   }
   and user_identity_set_input = {
-    data: Js.Nullable.t(jsonb),
-    identity_id: Js.Nullable.t(string),
-    identity_type: Js.Nullable.t(string),
-    user_id: Js.Nullable.t(string),
+    .
+    "data": Js.Nullable.t(jsonb),
+    "identity_id": Js.Nullable.t(string),
+    "identity_type": Js.Nullable.t(string),
+    "user_id": Js.Nullable.t(string),
   }
-  and user_identity_delete_key_input = {data: Js.Nullable.t(string)}
-  and note_revision_delete_elem_input = {data: Js.Nullable.t(int)}
+  and user_identity_delete_key_input = {. "data": Js.Nullable.t(string)}
+  and note_revision_delete_elem_input = {. "data": Js.Nullable.t(int)}
   and note_delete_at_path_input = {
-    data: Js.Nullable.t(array(Js.Nullable.t(string))),
+    .
+    "data": Js.Nullable.t(array(Js.Nullable.t(string))),
   }
   and note_bool_exp = {
-    _and: Js.Nullable.t(array(Js.Nullable.t(note_bool_exp))),
-    _not: Js.Nullable.t(note_bool_exp),
-    _or: Js.Nullable.t(array(Js.Nullable.t(note_bool_exp))),
-    created_at: Js.Nullable.t(timestamptz_comparison_exp),
-    data: Js.Nullable.t(jsonb_comparison_exp),
-    id: Js.Nullable.t(varchar_comparison_exp),
-    notes: Js.Nullable.t(note_revision_bool_exp),
-    title: Js.Nullable.t(text_comparison_exp),
-    updated_at: Js.Nullable.t(timestamptz_comparison_exp),
-    user: Js.Nullable.t(user_bool_exp),
-    user_id: Js.Nullable.t(varchar_comparison_exp),
+    .
+    "_and": Js.Nullable.t(array(Js.Nullable.t(note_bool_exp))),
+    "_not": Js.Nullable.t(note_bool_exp),
+    "_or": Js.Nullable.t(array(Js.Nullable.t(note_bool_exp))),
+    "created_at": Js.Nullable.t(timestamptz_comparison_exp),
+    "data": Js.Nullable.t(jsonb_comparison_exp),
+    "id": Js.Nullable.t(varchar_comparison_exp),
+    "notes": Js.Nullable.t(note_revision_bool_exp),
+    "title": Js.Nullable.t(text_comparison_exp),
+    "updated_at": Js.Nullable.t(timestamptz_comparison_exp),
+    "user": Js.Nullable.t(user_bool_exp),
+    "user_id": Js.Nullable.t(varchar_comparison_exp),
   }
-  and user_identity_prepend_input = {data: Js.Nullable.t(jsonb)}
+  and user_identity_prepend_input = {. "data": Js.Nullable.t(jsonb)}
   and user_identity_type_insert_input = {
-    user_identity_type: Js.Nullable.t(string),
+    .
+    "user_identity_type": Js.Nullable.t(string),
   }
-  and user_identity_append_input = {data: Js.Nullable.t(jsonb)}
-  and note_delete_elem_input = {data: Js.Nullable.t(int)}
+  and user_identity_append_input = {. "data": Js.Nullable.t(jsonb)}
+  and note_delete_elem_input = {. "data": Js.Nullable.t(int)}
   and note_revision_insert_input = {
-    created_at: Js.Nullable.t(timestamptz),
-    data: Js.Nullable.t(jsonb),
-    note_id: Js.Nullable.t(string),
-    title: Js.Nullable.t(string),
+    .
+    "created_at": Js.Nullable.t(timestamptz),
+    "data": Js.Nullable.t(jsonb),
+    "note_id": Js.Nullable.t(string),
+    "title": Js.Nullable.t(string),
   }
   and note_revision_bool_exp = {
-    _and: Js.Nullable.t(array(Js.Nullable.t(note_revision_bool_exp))),
-    _not: Js.Nullable.t(note_revision_bool_exp),
-    _or: Js.Nullable.t(array(Js.Nullable.t(note_revision_bool_exp))),
-    created_at: Js.Nullable.t(timestamptz_comparison_exp),
-    data: Js.Nullable.t(jsonb_comparison_exp),
-    note: Js.Nullable.t(note_bool_exp),
-    note_id: Js.Nullable.t(varchar_comparison_exp),
-    title: Js.Nullable.t(text_comparison_exp),
+    .
+    "_and": Js.Nullable.t(array(Js.Nullable.t(note_revision_bool_exp))),
+    "_not": Js.Nullable.t(note_revision_bool_exp),
+    "_or": Js.Nullable.t(array(Js.Nullable.t(note_revision_bool_exp))),
+    "created_at": Js.Nullable.t(timestamptz_comparison_exp),
+    "data": Js.Nullable.t(jsonb_comparison_exp),
+    "note": Js.Nullable.t(note_bool_exp),
+    "note_id": Js.Nullable.t(varchar_comparison_exp),
+    "title": Js.Nullable.t(text_comparison_exp),
   }
-  and note_revision_append_input = {data: Js.Nullable.t(jsonb)}
+  and note_revision_append_input = {. "data": Js.Nullable.t(jsonb)}
   and user_bool_exp = {
-    _and: Js.Nullable.t(array(Js.Nullable.t(user_bool_exp))),
-    _not: Js.Nullable.t(user_bool_exp),
-    _or: Js.Nullable.t(array(Js.Nullable.t(user_bool_exp))),
-    avatar: Js.Nullable.t(varchar_comparison_exp),
-    created_at: Js.Nullable.t(timestamptz_comparison_exp),
-    email: Js.Nullable.t(varchar_comparison_exp),
-    id: Js.Nullable.t(varchar_comparison_exp),
-    identities: Js.Nullable.t(user_identity_bool_exp),
-    name: Js.Nullable.t(varchar_comparison_exp),
-    notes: Js.Nullable.t(note_bool_exp),
-    updated_at: Js.Nullable.t(timestamptz_comparison_exp),
-    username: Js.Nullable.t(text_comparison_exp),
+    .
+    "_and": Js.Nullable.t(array(Js.Nullable.t(user_bool_exp))),
+    "_not": Js.Nullable.t(user_bool_exp),
+    "_or": Js.Nullable.t(array(Js.Nullable.t(user_bool_exp))),
+    "avatar": Js.Nullable.t(varchar_comparison_exp),
+    "created_at": Js.Nullable.t(timestamptz_comparison_exp),
+    "email": Js.Nullable.t(varchar_comparison_exp),
+    "id": Js.Nullable.t(varchar_comparison_exp),
+    "identities": Js.Nullable.t(user_identity_bool_exp),
+    "name": Js.Nullable.t(varchar_comparison_exp),
+    "notes": Js.Nullable.t(note_bool_exp),
+    "updated_at": Js.Nullable.t(timestamptz_comparison_exp),
+    "username": Js.Nullable.t(text_comparison_exp),
   }
   and user_identity_type_on_conflict = {
-    action: conflict_action,
-    constraint_: Js.Nullable.t(user_identity_type_constraint),
+    .
+    "action": abs_conflict_action,
+    "constraint": Js.Nullable.t(abs_user_identity_type_constraint),
   }
   and user_on_conflict = {
-    action: conflict_action,
-    constraint_: Js.Nullable.t(user_constraint),
+    .
+    "action": abs_conflict_action,
+    "constraint": Js.Nullable.t(abs_user_constraint),
   }
   and text_comparison_exp = {
-    _eq: Js.Nullable.t(string),
-    _gt: Js.Nullable.t(string),
-    _gte: Js.Nullable.t(string),
-    _ilike: Js.Nullable.t(string),
-    _in: Js.Nullable.t(array(Js.Nullable.t(string))),
-    _is_null: Js.Nullable.t(bool),
-    _like: Js.Nullable.t(string),
-    _lt: Js.Nullable.t(string),
-    _lte: Js.Nullable.t(string),
-    _neq: Js.Nullable.t(string),
-    _nilike: Js.Nullable.t(string),
-    _nin: Js.Nullable.t(array(Js.Nullable.t(string))),
-    _nlike: Js.Nullable.t(string),
-    _nsimilar: Js.Nullable.t(string),
-    _similar: Js.Nullable.t(string),
+    .
+    "_eq": Js.Nullable.t(string),
+    "_gt": Js.Nullable.t(string),
+    "_gte": Js.Nullable.t(string),
+    "_ilike": Js.Nullable.t(string),
+    "_in": Js.Nullable.t(array(Js.Nullable.t(string))),
+    "_is_null": Js.Nullable.t(bool),
+    "_like": Js.Nullable.t(string),
+    "_lt": Js.Nullable.t(string),
+    "_lte": Js.Nullable.t(string),
+    "_neq": Js.Nullable.t(string),
+    "_nilike": Js.Nullable.t(string),
+    "_nin": Js.Nullable.t(array(Js.Nullable.t(string))),
+    "_nlike": Js.Nullable.t(string),
+    "_nsimilar": Js.Nullable.t(string),
+    "_similar": Js.Nullable.t(string),
   }
   and varchar_comparison_exp = {
-    _eq: Js.Nullable.t(string),
-    _gt: Js.Nullable.t(string),
-    _gte: Js.Nullable.t(string),
-    _ilike: Js.Nullable.t(string),
-    _in: Js.Nullable.t(array(Js.Nullable.t(string))),
-    _is_null: Js.Nullable.t(bool),
-    _like: Js.Nullable.t(string),
-    _lt: Js.Nullable.t(string),
-    _lte: Js.Nullable.t(string),
-    _neq: Js.Nullable.t(string),
-    _nilike: Js.Nullable.t(string),
-    _nin: Js.Nullable.t(array(Js.Nullable.t(string))),
-    _nlike: Js.Nullable.t(string),
-    _nsimilar: Js.Nullable.t(string),
-    _similar: Js.Nullable.t(string),
+    .
+    "_eq": Js.Nullable.t(string),
+    "_gt": Js.Nullable.t(string),
+    "_gte": Js.Nullable.t(string),
+    "_ilike": Js.Nullable.t(string),
+    "_in": Js.Nullable.t(array(Js.Nullable.t(string))),
+    "_is_null": Js.Nullable.t(bool),
+    "_like": Js.Nullable.t(string),
+    "_lt": Js.Nullable.t(string),
+    "_lte": Js.Nullable.t(string),
+    "_neq": Js.Nullable.t(string),
+    "_nilike": Js.Nullable.t(string),
+    "_nin": Js.Nullable.t(array(Js.Nullable.t(string))),
+    "_nlike": Js.Nullable.t(string),
+    "_nsimilar": Js.Nullable.t(string),
+    "_similar": Js.Nullable.t(string),
   };
   type user_identity_type_mutation_response = {
-    affected_rows: int,
-    returning: array(user_identity_type_no_rels),
+    .
+    "affected_rows": int,
+    "returning": array(user_identity_type_no_rels),
   }
   and note_no_rels = {
-    created_at: Js.Nullable.t(timestamptz),
-    data: Js.Nullable.t(jsonb),
-    id: Js.Nullable.t(string),
-    title: Js.Nullable.t(string),
-    updated_at: Js.Nullable.t(timestamptz),
-    user_id: Js.Nullable.t(string),
+    .
+    "created_at": Js.Nullable.t(timestamptz),
+    "data": Js.Nullable.t(jsonb),
+    "id": Js.Nullable.t(string),
+    "title": Js.Nullable.t(string),
+    "updated_at": Js.Nullable.t(timestamptz),
+    "user_id": Js.Nullable.t(string),
   }
   and user_identity_mutation_response = {
-    affected_rows: int,
-    returning: array(user_identity_no_rels),
+    .
+    "affected_rows": int,
+    "returning": array(user_identity_no_rels),
   }
   and mutation_root = {
-    delete_note: Js.Nullable.t(note_mutation_response),
-    delete_note_revision: Js.Nullable.t(note_revision_mutation_response),
-    delete_user: Js.Nullable.t(user_mutation_response),
-    delete_user_identity: Js.Nullable.t(user_identity_mutation_response),
-    delete_user_identity_type:
+    .
+    "delete_note": Js.Nullable.t(note_mutation_response),
+    "delete_note_revision": Js.Nullable.t(note_revision_mutation_response),
+    "delete_user": Js.Nullable.t(user_mutation_response),
+    "delete_user_identity": Js.Nullable.t(user_identity_mutation_response),
+    "delete_user_identity_type":
       Js.Nullable.t(user_identity_type_mutation_response),
-    insert_note: Js.Nullable.t(note_mutation_response),
-    insert_note_revision: Js.Nullable.t(note_revision_mutation_response),
-    insert_user: Js.Nullable.t(user_mutation_response),
-    insert_user_identity: Js.Nullable.t(user_identity_mutation_response),
-    insert_user_identity_type:
+    "insert_note": Js.Nullable.t(note_mutation_response),
+    "insert_note_revision": Js.Nullable.t(note_revision_mutation_response),
+    "insert_user": Js.Nullable.t(user_mutation_response),
+    "insert_user_identity": Js.Nullable.t(user_identity_mutation_response),
+    "insert_user_identity_type":
       Js.Nullable.t(user_identity_type_mutation_response),
-    update_note: Js.Nullable.t(note_mutation_response),
-    update_note_revision: Js.Nullable.t(note_revision_mutation_response),
-    update_user: Js.Nullable.t(user_mutation_response),
-    update_user_identity: Js.Nullable.t(user_identity_mutation_response),
-    update_user_identity_type:
+    "update_note": Js.Nullable.t(note_mutation_response),
+    "update_note_revision": Js.Nullable.t(note_revision_mutation_response),
+    "update_user": Js.Nullable.t(user_mutation_response),
+    "update_user_identity": Js.Nullable.t(user_identity_mutation_response),
+    "update_user_identity_type":
       Js.Nullable.t(user_identity_type_mutation_response),
   }
   and note_mutation_response = {
-    affected_rows_1: int,
-    returning_1: array(note_no_rels),
+    .
+    "affected_rows": int,
+    "returning": array(note_no_rels),
   }
   and note_revision_mutation_response = {
-    affected_rows_1: int,
-    returning_1: array(note_revision_no_rels),
+    .
+    "affected_rows": int,
+    "returning": array(note_revision_no_rels),
   }
   and user_mutation_response = {
-    affected_rows: int,
-    returning: array(user_no_rels),
+    .
+    "affected_rows": int,
+    "returning": array(user_no_rels),
   }
   and user_no_rels = {
-    avatar: Js.Nullable.t(string),
-    created_at: Js.Nullable.t(timestamptz),
-    email: Js.Nullable.t(string),
-    id: Js.Nullable.t(string),
-    name: Js.Nullable.t(string),
-    updated_at: Js.Nullable.t(timestamptz),
-    username: Js.Nullable.t(string),
+    .
+    "avatar": Js.Nullable.t(string),
+    "created_at": Js.Nullable.t(timestamptz),
+    "email": Js.Nullable.t(string),
+    "id": Js.Nullable.t(string),
+    "name": Js.Nullable.t(string),
+    "updated_at": Js.Nullable.t(timestamptz),
+    "username": Js.Nullable.t(string),
   }
   and user_identity = {
-    data: Js.Nullable.t(jsonb),
-    identity_id: Js.Nullable.t(string),
-    identity_type: Js.Nullable.t(string),
-    user: Js.Nullable.t(user),
-    user_id: Js.Nullable.t(string),
+    .
+    "data": Js.Nullable.t(jsonb),
+    "identity_id": Js.Nullable.t(string),
+    "identity_type": Js.Nullable.t(string),
+    "user": Js.Nullable.t(user),
+    "user_id": Js.Nullable.t(string),
   }
-  and user_identity_type = {user_identity_type_1: Js.Nullable.t(string)}
+  and user_identity_type = {. "user_identity_type": Js.Nullable.t(string)}
   and query_root = {
-    note: array(note),
-    note_revision: array(note_revision),
-    user: array(user),
-    user_identity: array(user_identity),
-    user_identity_type_1: array(user_identity_type),
+    .
+    "note": array(note),
+    "note_revision": array(note_revision),
+    "user": array(user),
+    "user_identity": array(user_identity),
+    "user_identity_type": array(user_identity_type),
   }
   and user_identity_type_no_rels = {
-    user_identity_type: Js.Nullable.t(string),
+    .
+    "user_identity_type": Js.Nullable.t(string),
   }
   and note_revision_no_rels = {
-    created_at_1: Js.Nullable.t(timestamptz),
-    data_1: Js.Nullable.t(jsonb),
-    note_id: Js.Nullable.t(string),
-    title_1: Js.Nullable.t(string),
+    .
+    "created_at": Js.Nullable.t(timestamptz),
+    "data": Js.Nullable.t(jsonb),
+    "note_id": Js.Nullable.t(string),
+    "title": Js.Nullable.t(string),
   }
   and note = {
-    created_at: Js.Nullable.t(timestamptz),
-    data_1: Js.Nullable.t(jsonb),
-    id: Js.Nullable.t(string),
-    notes: array(note_revision),
-    title: Js.Nullable.t(string),
-    updated_at: Js.Nullable.t(timestamptz),
-    user: Js.Nullable.t(user),
-    user_id_1: Js.Nullable.t(string),
+    .
+    "created_at": Js.Nullable.t(timestamptz),
+    "data": Js.Nullable.t(jsonb),
+    "id": Js.Nullable.t(string),
+    "notes": array(note_revision),
+    "title": Js.Nullable.t(string),
+    "updated_at": Js.Nullable.t(timestamptz),
+    "user": Js.Nullable.t(user),
+    "user_id": Js.Nullable.t(string),
   }
   and user_identity_no_rels = {
-    data: Js.Nullable.t(jsonb),
-    identity_id: Js.Nullable.t(string),
-    identity_type: Js.Nullable.t(string),
-    user_id: Js.Nullable.t(string),
+    .
+    "data": Js.Nullable.t(jsonb),
+    "identity_id": Js.Nullable.t(string),
+    "identity_type": Js.Nullable.t(string),
+    "user_id": Js.Nullable.t(string),
   }
   and subscription_root = {
-    note: array(note),
-    note_revision: array(note_revision),
-    user: array(user),
-    user_identity: array(user_identity),
-    user_identity_type: array(user_identity_type),
+    .
+    "note": array(note),
+    "note_revision": array(note_revision),
+    "user": array(user),
+    "user_identity": array(user_identity),
+    "user_identity_type": array(user_identity_type),
   }
   and user = {
-    avatar: Js.Nullable.t(string),
-    created_at_1: Js.Nullable.t(timestamptz),
-    email: Js.Nullable.t(string),
-    id: Js.Nullable.t(string),
-    identities: array(user_identity),
-    name: Js.Nullable.t(string),
-    notes: array(note),
-    updated_at: Js.Nullable.t(timestamptz),
-    username: Js.Nullable.t(string),
+    .
+    "avatar": Js.Nullable.t(string),
+    "created_at": Js.Nullable.t(timestamptz),
+    "email": Js.Nullable.t(string),
+    "id": Js.Nullable.t(string),
+    "identities": array(user_identity),
+    "name": Js.Nullable.t(string),
+    "notes": array(note),
+    "updated_at": Js.Nullable.t(timestamptz),
+    "username": Js.Nullable.t(string),
   }
   and note_revision = {
-    created_at: Js.Nullable.t(timestamptz),
-    data: Js.Nullable.t(jsonb),
-    note: Js.Nullable.t(note),
-    note_id: Js.Nullable.t(string),
-    title: Js.Nullable.t(string),
+    .
+    "created_at": Js.Nullable.t(timestamptz),
+    "data": Js.Nullable.t(jsonb),
+    "note": Js.Nullable.t(note),
+    "note_id": Js.Nullable.t(string),
+    "title": Js.Nullable.t(string),
   };
   module Query = {};
   module Mutation = {};

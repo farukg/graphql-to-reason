@@ -1,4 +1,5 @@
 (library
-  (name lib)
-  (libraries core ppxlib yojson)
-  (preprocess (pps ppx_tools_versioned.metaquot_404)))
+ (name lib)
+ (libraries core ppxlib yojson)
+ (preprocess
+  (pps ppx_tools_versioned.metaquot_404)))

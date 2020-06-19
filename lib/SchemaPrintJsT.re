@@ -1,4 +1,4 @@
-open Migrate_parsetree.Ast_404;
+open Ast_404;
 open Parsetree;
 open Ast_helper;
 open Schema;
@@ -27,13 +27,11 @@ let uncap_key =
   | "JSON" => "json"
   | s => uncap(s);
 
-let closed_js_t = fields => {
-  // let x =Ptype_record(fields);
+let closed_js_t = fields =>
   Typ.constr(
     {txt: Longident.parse("Js.t"), loc: Location.none},
     [Typ.object_(fields, Closed)],
   );
-};
 
 let prefixes: Hashtbl.t(string, int) = Hashtbl.create(10);
 
@@ -128,20 +126,31 @@ let gql_type = key =>
   | "boolean" => [%type: bool]
   | "float" => [%type: float]
   | "string" => [%type: string]
-  | _ => Typ.constr({txt: Longident.Lident(uncap_key(key)), loc: Location.none}, [])
+  | _ =>
+    Typ.constr(
+      {txt: Longident.Lident(uncap_key(key)), loc: Location.none},
+      [],
+    )
   };
 
 let abstractRecord = (name, labels) =>
   Type.mk(
     ~kind=Ptype_record(labels),
-    ~attrs=[({txt: "bs.deriving", loc: Location.none}, PStr([%str abstract]))],
+    ~attrs=[
+      ({txt: "bs.deriving", loc: Location.none}, PStr([%str abstract])),
+    ],
     {Location.txt: name, loc: Location.none},
   );
 
 let enum = (name, strings) =>
   Type.mk(
     ~kind=Ptype_abstract,
-    ~attrs=[({txt: "bs.deriving", loc: Location.none}, PStr([%str {jsConverter: newType}]))],
+    ~attrs=[
+      (
+        {txt: "bs.deriving", loc: Location.none},
+        PStr([%str {jsConverter: newType}]),
+      ),
+    ],
     ~manifest=
       Typ.variant(
         List.map(
@@ -201,9 +210,13 @@ let print = schema => {
     }
   and print_type_ref = (~uncap_key=uncap_key, tm) =>
     switch (tm) {
-    | Named(name) => [%type: Js.Nullable.t([%t name |> uncap_key |> gql_type])]
+    | Named(name) => [%type:
+        Js.Nullable.t([%t name |> uncap_key |> gql_type])
+      ]
     | NonNull(tr) => print_type_ref_nonNullable(~uncap_key, tr)
-    | List(tr) => [%type: Js.Nullable.t(array([%t print_type_ref(~uncap_key, tr)]))]
+    | List(tr) => [%type:
+        Js.Nullable.t(array([%t print_type_ref(~uncap_key, tr)]))
+      ]
     };
 
   let rec print_field_type_name = (~uncap_key=uncap_key, tm) =>
@@ -215,53 +228,30 @@ let print = schema => {
 
   let rec print_fields = (name, fields) =>
     Type.mk(
-      ~kind=Ptype_record(print_record_fields(fields)),
-      {Location.txt: name |> uncap_key, loc: Location.none},
+      ~manifest=closed_js_t(List.map(print_field, fields)),
+      {Location.txt: uncap_key(name), loc: Location.none},
     )
-  and print_record_fields = fields => List.map(print_record_field, fields)
-  and print_record_field = ({fm_name, fm_field_type, _}) => {
-    let (key, extraAttrs) = escape_id(fm_name);
-    let key = prefix(key);
-
-    Type.field({Location.txt: key, loc: Location.none}, print_type_ref(fm_field_type));
-  }
-  // and print_record_args = fields => List.map(print_record_arg, fields)
-  // and print_record_arg = ({am_name, am_arg_type, _}) => {
-  //   let (key, extraAttrs) = escape_id(am_name);
-  //   let key = prefix(key);
-
-  //   Type.field({Location.txt: key, loc: Location.none}, print_type_ref(am_arg_type));
-  // }
+  and print_field = ({fm_name, fm_field_type, _}) => (
+    fm_name,
+    [],
+    print_type_ref(fm_field_type),
+  )
   and print_root_resolver = fields =>
     List.map(
       ({fm_name, fm_arguments, fm_field_type, _}) => {
         let (key, extraAttrs) = escape_id(fm_name);
         let key = prefix(key);
         Type.field(
-          ~attrs=[({txt: "bs.optional", loc: Location.none}, PStr([])), ...extraAttrs],
+          ~attrs=[
+            ({txt: "bs.optional", loc: Location.none}, PStr([])),
+            ...extraAttrs,
+          ],
           {Location.txt: key, loc: Location.none},
           Typ.constr(
             {txt: Longident.parse("rootResolver"), loc: Location.none},
             [
               switch (fm_arguments) {
               | [] => [%type: unit]
-              // | _ => print_field_type_name(fm_field_type)
-              //         {
-              //           // let cc =print_record_args(fm_arguments);
-              //         // let ccc= Ptype_record(cc);
-              //       // let cc =
-              //       //     List.map(
-              //       //       ({am_name, am_arg_type, _}) =>
-              //       //         print_field_type_name(am_arg_type),
-              //       //       fm_arguments,
-              //       //     );
-              //         // Typ.constr(
-              //         //   {txt: Longident.Lident(key), loc: Location.none},
-              //         //   cc,
-              //         // );
-              //         //  [%type: unit];
-              // print_field_type_name(fm_field_type)
-              //          }
               | _ => closed_js_t(List.map(print_arg, fm_arguments))
               },
               print_field_type_name(fm_field_type),
@@ -279,12 +269,18 @@ let print = schema => {
         let key = prefix(key);
 
         Type.field(
-          ~attrs=[({txt: "bs.optional", loc: Location.none}, PStr([])), ...extraAttrs],
+          ~attrs=[
+            ({txt: "bs.optional", loc: Location.none}, PStr([])),
+            ...extraAttrs,
+          ],
           {Location.txt: key, loc: Location.none},
           Typ.constr(
             {txt: Longident.parse("Config.resolver"), loc: Location.none},
             [
-              Typ.constr({txt: Longident.Lident(parent), loc: Location.none}, []),
+              Typ.constr(
+                {txt: Longident.Lident(parent), loc: Location.none},
+                [],
+              ),
               switch (fm_arguments) {
               | [] => [%type: unit]
               | _ => closed_js_t(List.map(print_arg, fm_arguments))
@@ -303,7 +299,10 @@ let print = schema => {
 
     [
       Type.field(
-        ~attrs=[({txt: "bs.optional", loc: Location.none}, PStr([])), ...extraAttrs],
+        ~attrs=[
+          ({txt: "bs.optional", loc: Location.none}, PStr([])),
+          ...extraAttrs,
+        ],
         {Location.txt: key, loc: Location.none},
         Typ.constr(
           {txt: Longident.parse("directiveResolver"), loc: Location.none},
@@ -325,7 +324,10 @@ let print = schema => {
     | "Int" => None
     | name =>
       Some(
-        Sig.type_(Recursive, [Type.mk({Location.txt: uncap_key(name), loc: Location.none})]),
+        Sig.type_(
+          Recursive,
+          [Type.mk({Location.txt: uncap_key(name), loc: Location.none})],
+        ),
       )
     }
   and print_enum = ({em_name, em_values, _}) =>
@@ -347,8 +349,14 @@ let print = schema => {
         let arrowType =
           Typ.arrow(
             Nolabel,
-            Typ.constr({txt: Longident.Lident(unionType), loc: Location.none}, []),
-            Typ.constr({txt: Longident.Lident(unionName), loc: Location.none}, []),
+            Typ.constr(
+              {txt: Longident.Lident(unionType), loc: Location.none},
+              [],
+            ),
+            Typ.constr(
+              {txt: Longident.Lident(unionName), loc: Location.none},
+              [],
+            ),
           );
         Str.primitive(
           Val.mk(
@@ -361,45 +369,23 @@ let print = schema => {
       um_of_types,
     );
   }
-  and print_field_jsT = ({fm_name, fm_field_type, _}) => (
-    fm_name,
-    [],
-    print_type_ref(fm_field_type),
-  )
   and print_interface = ({im_name, im_fields, _}) =>
     Type.mk(
-      ~manifest=closed_js_t(List.map(print_field_jsT, im_fields)),
+      ~manifest=closed_js_t(List.map(print_field, im_fields)),
       {Location.txt: uncap_key(im_name), loc: Location.none},
     )
-  and print_input = ({iom_name, iom_input_fields, _}) => print_args(iom_name, iom_input_fields)
-  // and print_args_list_label_decl = (name, args) => {
-  //   let (key, extraAttrs) = escape_id(name);
-  //   List.map(
-  //     ({am_name, am_arg_type, _}) => {
-  //       let (key, extraAttrs) = escape_id(am_name);
-  //       Type.field({Location.txt: key, loc: Location.none}, print_type_ref(am_arg_type));
-  //     },
-  //     args,
-  //   );
-  // }
-
+  and print_input = ({iom_name, iom_input_fields, _}) =>
+    print_args(iom_name, iom_input_fields)
   and print_arg = ({am_name, am_arg_type, _}) => (
     am_name,
     [],
     print_type_ref(~uncap_key=uncap_key_resolver, am_arg_type),
   )
-  and print_args = (name, args) => {
-    let (key, extraAttrs) = escape_id(name);
-    let x =
-      List.map(
-        ({am_name, am_arg_type, _}) => {
-          let (key, extraAttrs) = escape_id(am_name);
-          Type.field({Location.txt: key, loc: Location.none}, print_type_ref(am_arg_type));
-        },
-        args,
-      );
-    Type.mk(~kind=Ptype_record(x), {Location.txt: key |> uncap_key, loc: Location.none});
-  };
+  and print_args = (name, args) =>
+    Type.mk(
+      ~manifest=closed_js_t(List.map(print_arg, args)),
+      {Location.txt: uncap_key(name), loc: Location.none},
+    );
 
   Hashtbl.iter(
     (_key, type_meta) =>
@@ -409,16 +395,23 @@ let print = schema => {
         | isPrivate when String.sub(isPrivate, 0, 2) == "__" => ()
         | name =>
           state.fields = [print_fields(om_name, om_fields), ...state.fields];
-          state.used_resolvers = List.append(state.used_resolvers, [om_name]);
+          state.used_resolvers =
+            List.append(state.used_resolvers, [om_name]);
           resetPrefixes();
 
           switch (name) {
           | "mutation" =>
-            state.mutations = List.append(state.mutations, print_root_resolver(om_fields))
-          | "query" => state.queries = List.append(state.queries, print_root_resolver(om_fields))
+            state.mutations =
+              List.append(state.mutations, print_root_resolver(om_fields))
+          | "query" =>
+            state.queries =
+              List.append(state.queries, print_root_resolver(om_fields))
           | "subscription" =>
             state.subscriptions =
-              List.append(state.subscriptions, print_root_resolver(om_fields))
+              List.append(
+                state.subscriptions,
+                print_root_resolver(om_fields),
+              )
           | _ =>
             state.resolvers =
               List.append(
@@ -442,15 +435,24 @@ let print = schema => {
                                       Type.mk(
                                         ~kind=
                                           Ptype_record(
-                                            print_resolver(om_name |> uncap_key, om_fields),
+                                            print_resolver(
+                                              om_name |> uncap_key,
+                                              om_fields,
+                                            ),
                                           ),
                                         ~attrs=[
                                           (
-                                            {txt: "bs.deriving", loc: Location.none},
+                                            {
+                                              txt: "bs.deriving",
+                                              loc: Location.none,
+                                            },
                                             PStr([%str abstract]),
                                           ),
                                         ],
-                                        {Location.txt: "t", loc: Location.none},
+                                        {
+                                          Location.txt: "t",
+                                          loc: Location.none,
+                                        },
                                       ),
                                     ],
                                   ),
@@ -478,18 +480,22 @@ let print = schema => {
         | Some(td) => state.enums = [td, ...state.enums]
         | None => ()
         }
-      | Interface(im) => state.interfaces = [print_interface(im), ...state.interfaces]
+      | Interface(im) =>
+        state.interfaces = [print_interface(im), ...state.interfaces]
       | Union(um) =>
-        state.unions_helpers = List.append(print_union_runtime(um), state.unions_helpers);
+        state.unions_helpers =
+          List.append(print_union_runtime(um), state.unions_helpers);
         state.unions = [print_union(um), ...state.unions];
-      | InputObject(iom) => state.inputs = [print_input(iom), ...state.inputs]
+      | InputObject(iom) =>
+        state.inputs = [print_input(iom), ...state.inputs]
       },
     schema.type_map,
   );
 
   Hashtbl.iter(
     (_key, dm) =>
-      state.directives = List.append(state.directives, print_directive_resolver(dm)),
+      state.directives =
+        List.append(state.directives, print_directive_resolver(dm)),
     schema.directive_map,
   );
 
@@ -517,7 +523,12 @@ let print = schema => {
     | [] => [%str]
     | _ => [%str
         %s
-        [Str.type_(Recursive, List.flatten([state.unions, state.interfaces, state.fields]))]
+        [
+          Str.type_(
+            Recursive,
+            List.flatten([state.unions, state.interfaces, state.fields]),
+          ),
+        ]
       ]
     };
 
@@ -577,7 +588,11 @@ let print = schema => {
               {Location.txt: key, loc: Location.none},
               Typ.constr(
                 {
-                  txt: Ldot(Longident.parse(name |> String.capitalize_ascii), "t"),
+                  txt:
+                    Ldot(
+                      Longident.parse(name |> String.capitalize_ascii),
+                      "t",
+                    ),
                   loc: Location.none,
                 },
                 [],

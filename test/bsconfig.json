@@ -101,6 +101,10 @@
     {
       "name": "graphql",
       "command": "node ../../../schema.js $in $in.json && ../../../_build/default/graphql_to_reason.exe $in.json $out"
+    },
+    {
+      "name": "generate-schematypes",
+      "command": "node ../../../schema.js $in $in.json && ../../../_build/default/graphql_to_reason.exe $in.json $out"
     }
   ],
   "package-specs": [
@@ -113,5 +117,7 @@
   "bs-dependencies": [],
   "refmt": 3,
   "namespace": true,
-  "bsc-flags": ["-bs-super-errors"]
+  "bsc-flags": [
+    "-bs-super-errors"
+  ]
 }

@@ -8,8 +8,8 @@ module MakeSchema = (Config: SchemaConfig) => {
   type rootResolver('payload, 'fieldType, 'result) =
     Config.resolver(unit, 'payload, 'fieldType, 'result);
   type directiveResolver('payload) = Config.directiveResolver('payload);
-  type mutation = {. "click": click}
-  and query = {. "clicks": click};
+  type mutation = {click}
+  and query = {clicks: click};
   module Query = {
     [@bs.deriving abstract]
     type t = {
@@ -34,6 +34,8 @@ module MakeSchema = (Config: SchemaConfig) => {
       skip: directiveResolver({. "if": bool}),
       [@bs.optional]
       deprecated: directiveResolver({. "reason": Js.Nullable.t(string)}),
+      [@bs.optional]
+      specifiedBy: directiveResolver({. "url": string}),
     };
   };
   [@bs.deriving abstract]

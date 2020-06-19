@@ -8,7 +8,7 @@ module MakeSchema = (Config: SchemaConfig) => {
   type rootResolver('payload, 'fieldType, 'result) =
     Config.resolver(unit, 'payload, 'fieldType, 'result);
   type directiveResolver('payload) = Config.directiveResolver('payload);
-  type query = {foo: Js.Nullable.t(string)};
+  type query = {. "foo": Js.Nullable.t(string)};
   module Query = {
     [@bs.deriving abstract]
     type t = {

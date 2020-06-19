@@ -20,25 +20,27 @@ module MakeSchema = (Config: SchemaConfig) => {
     | [@bs.as "Female"] `Female
     | [@bs.as "NonBinary"] `NonBinary
   ];
-  type wrapper = {foo: Js.Nullable.t(string)}
+  type wrapper = {. "foo": Js.Nullable.t(string)}
   and genderInput = {
-    check: bool,
-    another: Js.Nullable.t(string),
-    listOfStrings: array(Js.Nullable.t(string)),
-    nullableListOfStrings: Js.Nullable.t(array(Js.Nullable.t(string))),
-    wrapper,
-    gender: Js.Nullable.t(gender),
+    .
+    "check": bool,
+    "another": Js.Nullable.t(string),
+    "listOfStrings": array(Js.Nullable.t(string)),
+    "nullableListOfStrings": Js.Nullable.t(array(Js.Nullable.t(string))),
+    "wrapper": wrapper,
+    "gender": Js.Nullable.t(abs_gender),
   };
   type userLike = {. "name": string}
-  and query = {user: Js.Nullable.t(user)}
+  and query = {. "user": Js.Nullable.t(user)}
   and user = {
-    name: string,
-    email: string,
-    gender: Js.Nullable.t(gender),
-    listNullable: Js.Nullable.t(array(Js.Nullable.t(string))),
-    list: array(Js.Nullable.t(string)),
-    getGender: gender,
-    self: user,
+    .
+    "name": string,
+    "email": string,
+    "gender": Js.Nullable.t(gender),
+    "listNullable": Js.Nullable.t(array(Js.Nullable.t(string))),
+    "list": array(Js.Nullable.t(string)),
+    "getGender": gender,
+    "self": user,
   };
   module Query = {
     [@bs.deriving abstract]

@@ -225,13 +225,14 @@ let print = schema => {
 
     Type.field({Location.txt: key, loc: Location.none}, print_type_ref(fm_field_type));
   }
-  // and print_record_args = fields => List.map(print_record_arg, fields)
-  // and print_record_arg = ({am_name, am_arg_type, _}) => {
-  //   let (key, extraAttrs) = escape_id(am_name);
-  //   let key = prefix(key);
+  and print_record_args = fields => List.map(print_record_arg, fields)
+  and print_record_arg = ({am_name, am_arg_type, _}) => {
+    let (key, extraAttrs) = escape_id(am_name);
+    let key = prefix(key);
 
-  //   Type.field({Location.txt: key, loc: Location.none}, print_type_ref(am_arg_type));
-  // }
+    Type.field({Location.txt: key, loc: Location.none}, print_type_ref(am_arg_type));
+  }
+
   and print_root_resolver = fields =>
     List.map(
       ({fm_name, fm_arguments, fm_field_type, _}) => {
@@ -242,31 +243,41 @@ let print = schema => {
           {Location.txt: key, loc: Location.none},
           Typ.constr(
             {txt: Longident.parse("rootResolver"), loc: Location.none},
-            [
+            List.concat([
               switch (fm_arguments) {
-              | [] => [%type: unit]
-              // | _ => print_field_type_name(fm_field_type)
-              //         {
-              //           // let cc =print_record_args(fm_arguments);
-              //         // let ccc= Ptype_record(cc);
-              //       // let cc =
-              //       //     List.map(
-              //       //       ({am_name, am_arg_type, _}) =>
-              //       //         print_field_type_name(am_arg_type),
-              //       //       fm_arguments,
-              //       //     );
-              //         // Typ.constr(
-              //         //   {txt: Longident.Lident(key), loc: Location.none},
-              //         //   cc,
-              //         // );
-              //         //  [%type: unit];
-              // print_field_type_name(fm_field_type)
-              //          }
-              | _ => closed_js_t(List.map(print_arg, fm_arguments))
+              | [] => [[%type: unit]]
+              | _ =>
+                // let args =
+                //   List.map(
+                //     ({am_name, am_arg_type, _}) => print_field_type_name(am_arg_type),
+                //     fm_arguments,
+                //   );
+                // print_resolver(fm_name, fields)
+                // let x =
+                // List.map(
+                //   ({am_name, am_arg_type, _}) => {
+                //     let (key, extraAttrs) = escape_id(am_name);
+                //     Type.field(
+                //       {Location.txt: Longident.Lident(key), loc: Location.none},
+                //       print_type_ref(am_arg_type),
+                //     );
+                //   },
+                //   fm_arguments,
+                // );
+                let f =
+                  List.map(
+                    ({am_name, am_arg_type, _}) => {
+                      let (key, extraAttrs) = escape_id(am_name);
+                      Typ.constr({txt: Longident.Lident(key), loc: Location.none}, []);
+                    },
+                    fm_arguments,
+                  );
+
+                f;
+              // print_args(fm_name, fm_arguments);
               },
-              print_field_type_name(fm_field_type),
-              print_type_ref(fm_field_type),
-            ],
+              [print_field_type_name(fm_field_type), print_type_ref(fm_field_type)],
+            ]),
           ),
         );
       },
@@ -372,16 +383,16 @@ let print = schema => {
       {Location.txt: uncap_key(im_name), loc: Location.none},
     )
   and print_input = ({iom_name, iom_input_fields, _}) => print_args(iom_name, iom_input_fields)
-  // and print_args_list_label_decl = (name, args) => {
-  //   let (key, extraAttrs) = escape_id(name);
-  //   List.map(
-  //     ({am_name, am_arg_type, _}) => {
-  //       let (key, extraAttrs) = escape_id(am_name);
-  //       Type.field({Location.txt: key, loc: Location.none}, print_type_ref(am_arg_type));
-  //     },
-  //     args,
-  //   );
-  // }
+  and print_args_list_label_decl = (name, args) => {
+    let (key, extraAttrs) = escape_id(name);
+    List.map(
+      ({am_name, am_arg_type, _}) => {
+        let (key, extraAttrs) = escape_id(am_name);
+        Type.field({Location.txt: key, loc: Location.none}, print_type_ref(am_arg_type));
+      },
+      args,
+    );
+  }
 
   and print_arg = ({am_name, am_arg_type, _}) => (
     am_name,

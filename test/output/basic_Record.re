@@ -120,28 +120,22 @@ module MakeSchema = (Config: SchemaConfig) => {
       [@bs.optional]
       lists: rootResolver(unit, lists, lists),
       [@bs.optional]
-      scalarsInput:
-        rootResolver({. "arg": variousScalarsInput}, string, string),
+      scalarsInput: rootResolver(arg, string, string),
       [@bs.optional]
-      listsInput: rootResolver({. "arg": listsInput}, string, string),
+      listsInput: rootResolver(arg, string, string),
       [@bs.optional]
-      recursiveInput:
-        rootResolver({. "arg": recursiveInput}, string, string),
+      recursiveInput: rootResolver(arg, string, string),
       [@bs.optional]
-      nonrecursiveInput:
-        rootResolver({. "arg": nonrecursiveInput}, string, string),
+      nonrecursiveInput: rootResolver(arg, string, string),
       [@bs.optional]
-      enumInput: rootResolver({. "arg": abs_sampleField}, string, string),
+      enumInput: rootResolver(arg, string, string),
       [@bs.optional]
-      argNamedQuery: rootResolver({. "query": int}, int, int),
+      argNamedQuery: rootResolver(query, int, int),
       [@bs.optional]
       customScalarField:
         rootResolver(
-          {
-            .
-            "argOptional": Js.Nullable.t(customScalar),
-            "argRequired": customScalar,
-          },
+          argOptional,
+          argRequired,
           customScalarObject,
           customScalarObject,
         ),

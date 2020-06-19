@@ -1,5 +1,5 @@
 module type SchemaConfig = {
-  module Scalars: {};
+  module Scalars: {type click;};
   type resolver('parent, 'payload, 'fieldType, 'result);
   type directiveResolver('payload);
 };
@@ -8,21 +8,26 @@ module MakeSchema = (Config: SchemaConfig) => {
   type rootResolver('payload, 'fieldType, 'result) =
     Config.resolver(unit, 'payload, 'fieldType, 'result);
   type directiveResolver('payload) = Config.directiveResolver('payload);
-  type query = {foo: Js.Nullable.t(string)};
+  type mutation = {. "click": click}
+  and query = {. "clicks": click};
   module Query = {
     [@bs.deriving abstract]
     type t = {
       [@bs.optional]
-      foo: rootResolver(unit, string, Js.Nullable.t(string)),
+      clicks: rootResolver(unit, click, click),
     };
   };
-  module Mutation = {};
+  module Mutation = {
+    [@bs.deriving abstract]
+    type t = {
+      [@bs.optional]
+      click: rootResolver({. "payload": string}, click, click),
+    };
+  };
   module Subscription = {};
   module Directives = {
     [@bs.deriving abstract]
     type t = {
-      [@bs.optional]
-      isAuthenticated: directiveResolver(unit),
       [@bs.optional] [@bs.as "include"]
       include_: directiveResolver({. "if": bool}),
       [@bs.optional]
@@ -30,22 +35,14 @@ module MakeSchema = (Config: SchemaConfig) => {
       [@bs.optional]
       deprecated: directiveResolver({. "reason": Js.Nullable.t(string)}),
       [@bs.optional]
-      hasScope:
-        directiveResolver({
-          .
-          "scope": Js.Nullable.t(array(Js.Nullable.t(string))),
-        }),
-      [@bs.optional]
       specifiedBy: directiveResolver({. "url": string}),
-      [@bs.optional]
-      upper: directiveResolver(unit),
-      [@bs.optional]
-      concat: directiveResolver({. "value": string}),
     };
   };
   [@bs.deriving abstract]
   type t = {
     [@bs.optional] [@bs.as "Query"]
     query: Query.t,
+    [@bs.optional] [@bs.as "Mutation"]
+    mutation: Mutation.t,
   };
 };
