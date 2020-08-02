@@ -16,22 +16,12 @@ node_modules/
 .yarn-integrity
 
 ci/
-test/
-lib/
-examples/
-graphql-to-reason.install
-graphql-to-reason.opam
-graphql_to_reason.re
+
 .travis.yml
 appveyor.yml
-Makefile
-esy.json
-esy.lock.json
 .gitignore
-dune
 CODE_OF_CONDUCT.md
 CONTRIBUTING.md
 yarn.lock
-dune-project
 
 .huskyrc
