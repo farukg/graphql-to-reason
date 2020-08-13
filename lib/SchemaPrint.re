@@ -41,7 +41,7 @@ let prefix = (key: string) =>
   switch (Hashtbl.find(prefixes, key)) {
   | counter =>
     Hashtbl.add(prefixes, key, counter + 1);
-    key ++ "_" ++ (counter |> string_of_int);
+    key;
   | exception Not_found =>
     Hashtbl.add(prefixes, key, 1);
     key;
