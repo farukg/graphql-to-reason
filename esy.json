@@ -14,23 +14,19 @@
   "dependencies": {
     "@esy-ocaml/reason": "3.5.x",
     "@opam/core": "v0.11.3",
-    "@opam/dune": "2.5.1",
-    "@opam/ocaml-migrate-parsetree": "1.7.3",
-    "@opam/ppx_tools": "5.1+4.06.0",
-    "@opam/ppx_tools_versioned": "5.4.0",
+    "@opam/dune": "2.7.1",
+    "@opam/merlin": "*",
+    "@opam/ocaml-migrate-parsetree": "*",
+    "@opam/ppx_let": "v0.11.0",
+    "@opam/ppxlib": "*",
     "@opam/yojson": "*",
-    "graphql": "^15.1.0",
-    "graphql-tools": "^6.0.9",
-    "ocaml": "~4.6.0",
-    "refmterr": "^3.3.2",
-    "@opam/ocaml-lsp-server": "ocaml/ocaml-lsp:ocaml-lsp-server.opam"
-  },
-  "resolutions": {
-    "@opam/menhir": "20200211",
-    "@opam/menhirLib": "20200211",
-    "@opam/menhirSdk": "20200211"
-  },
-  "devDependencies": {
-    "@esy-ocaml/merlin": "*"
+    "@reason-native/rely": "*",
+    "refmterr": "*",
+    "ocaml": "4.6.x",
+    "@opam/ocaml-lsp-server": "*",
+    "@opam/ocamlfind-secondary": "*",
+    "@opam/reason": "*"
+
   }
+
 }

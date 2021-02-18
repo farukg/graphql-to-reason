@@ -15,7 +15,10 @@ type Query {
   nonrecursiveInput(arg: NonrecursiveInput!): String!
   enumInput(arg: SampleField!): String!
   argNamedQuery(query: Int!): Int!
-  customScalarField(argOptional: CustomScalar, argRequired: CustomScalar!): CustomScalarObject!
+  customScalarField(
+    argOptional: CustomScalar
+    argRequired: CustomScalar!
+  ): CustomScalarObject!
 
   dogOrHuman: DogOrHuman!
 
@@ -109,7 +112,7 @@ type Dog {
 
 type Human {
   name: String!
-  Name: String!
+  #  Name: String! #not supported
 }
 
 union DogOrHuman = Dog | Human

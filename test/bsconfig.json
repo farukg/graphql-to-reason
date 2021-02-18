@@ -119,5 +119,8 @@
   "namespace": true,
   "bsc-flags": [
     "-bs-super-errors"
-  ]
+  ],  "warnings": {
+    "number": "-27-26-32-44-30",
+    "error": "+8"
+  }
 }

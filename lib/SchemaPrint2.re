@@ -1,12 +1,11 @@
 open Ppxlib;
-open Migrate_parsetree.Ast_404;
 
-open Ast_builder.Default.Located;
+open Asttypes;
 open Parsetree;
 open Ast_helper;
-open Ast_mapper;
+open Location;
 open Schema;
-let loc = default_loc^;
+
 type state = {
   mutable enums: list(type_declaration),
   mutable unions: list(type_declaration),
@@ -40,36 +39,7 @@ let closed_js_t = fields => {
 };
 
 let prefixes: Hashtbl.t(string, int) = Hashtbl.create(10);
-let fieldNames: Hashtbl.t(string, int) = Hashtbl.create(10);
 
-let fieldName = (key: string) =>
-  switch (Hashtbl.find(fieldNames, key)) {
-  | counter =>
-    Hashtbl.add(fieldNames, key, counter + 1);
-    key;
-  | exception Not_found =>
-    Hashtbl.add(fieldNames, key, 1);
-    key;
-  };
-let resetFieldNames = () => Hashtbl.clear(fieldNames);
- let filterList = (l,getKey)=> {
-   resetFieldNames();
-   List.filter((a) => {
-   let x= getKey(a)
-  switch (Hashtbl.find(fieldNames, x)) {
-  | counter =>
-    Hashtbl.add(fieldNames, x, counter + 1);
-    false;
-  | exception Not_found =>
-    Hashtbl.add(fieldNames, x, 1);
-    true;
-  };
-          },l)
- }
- let filterList = (l,getKey)=> {
-   resetFieldNames();
-   List.filter((a) => true,l)
- }
 let prefix = (key: string) =>
   switch (Hashtbl.find(prefixes, key)) {
   | counter =>
@@ -82,9 +52,11 @@ let prefix = (key: string) =>
 
 let resetPrefixes = () => Hashtbl.clear(prefixes);
 
+let t = {pstr_desc: () |> Obj.magic, pstr_loc: Location.none};
 
 let escape_id = key => {
   let originalKey = uncap_key(key);
+  let loc = Location.none;
   switch (originalKey) {
   | "and"
   | "see"
@@ -139,19 +111,24 @@ let escape_id = key => {
       [
         (
           {Location.txt: "bs.as", loc: Location.none},
-          PStr([%str [%e Exp.constant(Const.string(originalKey))]]),
+          [%str [%e Exp.constant(Const.string(originalKey))]],
         ),
       ],
     )
   | originalKey when originalKey != key => (
       originalKey,
       [
+        (
+          {Location.txt: "bs.as", loc: Location.none},
+          [%str [%e Exp.constant(Const.string(key))]],
+        ),
       ],
     )
   | originalKey => (originalKey, [])
   };
 };
-let gql_type = key =>
+let gql_type = key => {
+  let loc = Location.none;
   switch (String.lowercase_ascii(key)) {
   | "id" => [%type: string]
   | "int" => [%type: int]
@@ -164,21 +141,28 @@ let gql_type = key =>
       [],
     )
   };
+};
 
-let abstractRecord = (name, labels) =>
+let abstractRecord = (name, labels) => {
+  let loc = Location.none;
   Type.mk(
     ~kind=Ptype_record(labels),
     ~attrs=[
-      // ({txt: "bs.deriving", loc: Location.none}, PStr([%str abstract])),
+      ({txt: "bs.deriving", loc: Location.none}, PStr([%str abstract])),
     ],
     {Location.txt: name, loc: Location.none},
   );
+};
 
-let enum = (name, strings) =>
+let enum = (name, strings) => {
+  let loc = Location.none;
   Type.mk(
     ~kind=Ptype_abstract,
     ~attrs=[
-
+      (
+        {txt: "bs.deriving", loc: Location.none},
+        PStr([%str {jsConverter: newType}]),
+      ),
     ],
     ~manifest=
       Typ.variant(
@@ -186,8 +170,7 @@ let enum = (name, strings) =>
           name =>
             Rtag(
               name,
-              [
-              ],
+              [({txt: "bs.as", loc: Location.none}, PStr([%str name]))],
               true,
               [],
             ),
@@ -198,8 +181,9 @@ let enum = (name, strings) =>
       ),
     {Location.txt: name, loc: Location.none},
   );
-
+};
 let print = schema => {
+  let loc = Location.none;
   let state = {
     enums: [],
     unions: [],
@@ -218,7 +202,7 @@ let print = schema => {
 
   let uncap_key_resolver = s =>
     switch (Schema.lookup_type(schema, s)) {
-    | Some(Enum(_)) =>  uncap_key(s)
+    | Some(Enum(_)) => "abs_" ++ uncap_key(s)
     | None => uncap(s)
     | Some(Scalar(_))
     | Some(Object(_))
@@ -227,20 +211,21 @@ let print = schema => {
     | Some(InputObject(_)) => uncap_key(s)
     };
 
-  let rec print_type_ref_nonNullable = (~uncap_key=uncap_key, tm) =>
+  let rec print_type_ref_nonNullable = (~uncap_key=uncap_key, tm) => {
     switch (tm) {
     | Named(name) => uncap_key(name) |> gql_type
     | NonNull(tr) => print_type_ref_nonNullable(~uncap_key, tr)
     | List(tr) => [%type: array([%t print_type_ref(~uncap_key, tr)])]
-    }
+    };
+  }
   and print_type_ref = (~uncap_key=uncap_key, tm) =>
     switch (tm) {
     | Named(name) => [%type:
-        option([%t name |> uncap_key |> gql_type])
+        Js.Nullable.t([%t name |> uncap_key |> gql_type])
       ]
     | NonNull(tr) => print_type_ref_nonNullable(~uncap_key, tr)
     | List(tr) => [%type:
-        option(array([%t print_type_ref(~uncap_key, tr)]))
+        Js.Nullable.t(array([%t print_type_ref(~uncap_key, tr)]))
       ]
     };
 
@@ -256,7 +241,7 @@ let print = schema => {
       ~kind=Ptype_record(print_record_fields(fields)),
       {Location.txt: name |> uncap_key, loc: Location.none},
     )
-  and print_record_fields = fields => List.map(print_record_field, filterList(fields,a=>a.fm_name))
+  and print_record_fields = fields => List.map(print_record_field, fields)
   and print_record_field = ({fm_name, fm_field_type, _}) => {
     let (key, extraAttrs) = escape_id(fm_name);
     let key = prefix(key);
@@ -280,8 +265,8 @@ let print = schema => {
         let key = prefix(key);
         Type.field(
           ~attrs=[
-            // ({txt: "bs.optional", loc: Location.none}, PStr([])),
-            ...extraAttrs,
+            ({txt: "bs.optional", loc: Location.none}, PStr([])),
+            // ...extraAttrs,
           ],
           {Location.txt: key, loc: Location.none},
           Typ.constr(
@@ -306,7 +291,9 @@ let print = schema => {
               //         //  [%type: unit];
               // print_field_type_name(fm_field_type)
               //          }
-              | _ => closed_js_t(List.map(print_arg, fm_arguments))
+              | _ =>
+                let l = List.map(print_arg, fm_arguments);
+                closed_js_t(l |> Obj.magic);
               },
               print_field_type_name(fm_field_type),
               print_type_ref(fm_field_type),
@@ -324,8 +311,8 @@ let print = schema => {
 
         Type.field(
           ~attrs=[
-            // ({txt: "bs.optional", loc: Location.none}, PStr([])),
-            ...extraAttrs,
+            ({txt: "bs.optional", loc: Location.none}, PStr([])),
+            // ...extraAttrs,
           ],
           {Location.txt: key, loc: Location.none},
           Typ.constr(
@@ -337,7 +324,8 @@ let print = schema => {
               ),
               switch (fm_arguments) {
               | [] => [%type: unit]
-              | _ => closed_js_t(List.map(print_arg, fm_arguments))
+              | _ =>
+                closed_js_t(List.map(print_arg, fm_arguments) |> Obj.magic)
               },
               print_field_type_name(fm_field_type),
               print_type_ref(fm_field_type),
@@ -354,8 +342,8 @@ let print = schema => {
     [
       Type.field(
         ~attrs=[
-          // ({txt: "bs.optional", loc: Location.none}, PStr([])),
-          ...extraAttrs,
+          ({txt: "bs.optional", loc: Location.none}, PStr([])),
+          // ...extraAttrs,
         ],
         {Location.txt: key, loc: Location.none},
         Typ.constr(
@@ -363,7 +351,8 @@ let print = schema => {
           [
             switch (dm_arguments) {
             | [] => [%type: unit]
-            | _ => closed_js_t(List.map(print_arg, dm_arguments))
+            | _ =>
+              closed_js_t(List.map(print_arg, dm_arguments) |> Obj.magic)
             },
           ],
         ),
@@ -389,7 +378,12 @@ let print = schema => {
     | isPrivate when String.sub(isPrivate, 0, 2) == "__" => None
     | em_name =>
       let name = uncap_key(em_name);
-      Some(enum(name, List.map(({evm_name, _}) => evm_name, filterList(em_values,a=>a.evm_name))));
+      Some(
+        enum(
+          name,
+          List.map(({evm_name, _}) => evm_name, em_values) |> Obj.magic,
+        ),
+      );
     }
   and print_union = ({um_name, _}) =>
     Type.mk({Location.txt: uncap_key(um_name), loc: Location.none})
@@ -430,7 +424,8 @@ let print = schema => {
   )
   and print_interface = ({im_name, im_fields, _}) =>
     Type.mk(
-      ~manifest=closed_js_t(List.map(print_field_jsT, im_fields)),
+      ~manifest=
+        closed_js_t(List.map(print_field_jsT, im_fields) |> Obj.magic),
       {Location.txt: uncap_key(im_name), loc: Location.none},
     )
   and print_input = ({iom_name, iom_input_fields, _}) =>
@@ -477,7 +472,7 @@ let print = schema => {
         switch (String.lowercase_ascii(om_name)) {
         | isPrivate when String.sub(isPrivate, 0, 2) == "__" => ()
         | name =>
-          state.fields = [print_fields(om_name, filterList(om_fields,a=>a.fm_name)), ...state.fields];
+          state.fields = [print_fields(om_name, om_fields), ...state.fields];
           state.used_resolvers =
             List.append(state.used_resolvers, [om_name]);
           resetPrefixes();
@@ -496,28 +491,6 @@ let print = schema => {
                 print_root_resolver(om_fields),
               )
           | _ =>
-          let resolverType= Type.mk(
-                                        ~kind=
-                                          Ptype_record(
-                                            print_resolver(
-                                              om_name |> uncap_key,
-                                              om_fields,
-                                            ),
-                                          ),
-                                        ~attrs=[
-                                          // (
-                                          //   {
-                                          //     txt: "bs.deriving",
-                                          //     loc: Location.none,
-                                          //   },
-                                          //   PStr([%str abstract]),
-                                          // ),
-                                        ],
-                                        {
-                                          Location.txt: "t",
-                                          loc: Location.none,
-                                        },
-                                      );
             state.resolvers =
               List.append(
                 state.resolvers,
@@ -537,7 +510,28 @@ let print = schema => {
                                   Pstr_type(
                                     Recursive,
                                     [
-                                      resolverType,
+                                      Type.mk(
+                                        ~kind=
+                                          Ptype_record(
+                                            print_resolver(
+                                              om_name |> uncap_key,
+                                              om_fields,
+                                            ),
+                                          ),
+                                        ~attrs=[
+                                          (
+                                            {
+                                              txt: "bs.deriving",
+                                              loc: Location.none,
+                                            },
+                                            PStr([%str abstract]),
+                                          ),
+                                        ],
+                                        {
+                                          Location.txt: "t",
+                                          loc: Location.none,
+                                        },
+                                      ),
                                     ],
                                   ),
                                 pstr_loc: Location.none,
@@ -587,36 +581,74 @@ let print = schema => {
 
   let enums =
     switch (state.enums) {
-    | _ => Str.type_(Recursive, state.enums)
+    | [] => [%str]
+    | _ => [%str
+        %s
+        List.map(enum => Str.type_(Recursive, [enum]), state.enums)
+      ]
     };
 
   let inputs =
     switch (state.inputs) {
-    | _ => Str.type_(Recursive, state.inputs)
+    | [] => [%str]
+    | _ => [%str
+        %s
+        [Str.type_(Recursive, state.inputs)]
+      ]
+    };
+  let _fields =
+    switch (state.fields) {
+    | [] => [%str]
+    | _ => [%str
+        %s
+        [
+          Str.type_(
+            Recursive,
+            List.flatten([state.unions, state.interfaces, state.fields]),
+          ),
+        ]
+      ]
     };
 
   let queries =
     switch (state.queries) {
-    | _ => Str.type_(Recursive, [abstractRecord("t", state.queries)])
+    | [] => [%str]
+    | _ => [%str
+        %s
+        [Str.type_(Recursive, [abstractRecord("t", state.queries)])]
+      ]
     };
 
   let mutations =
     switch (state.mutations) {
-    | _ => Str.type_(Recursive, [abstractRecord("t", state.mutations)])
+    | [] => [%str]
+    | _ => [%str
+        %s
+        [Str.type_(Recursive, [abstractRecord("t", state.mutations)])]
+      ]
     };
 
   let subscriptions =
     switch (state.subscriptions) {
-    | _ => Str.type_(Recursive, [abstractRecord("t", state.subscriptions)])
+    | [] => [%str]
+    | _ => [%str
+        %s
+        [Str.type_(Recursive, [abstractRecord("t", state.subscriptions)])]
+      ]
     };
 
   let resolvers =
     switch (state.resolvers) {
-    | _ => state.resolvers
+    | [] => [%str]
+    | _ => [%str
+        %s
+        state.resolvers
+      ]
     };
 
   let used_resolvers =
     switch (state.used_resolvers) {
+    | [] => [%str]
     | _ =>
       resetPrefixes();
       let labels =
@@ -626,8 +658,8 @@ let print = schema => {
             let key = prefix(key);
 
             let attrs = [
-              // Location.({txt: "bs.optional", loc: Location.none}, PStr([])),
-              ...extraAttrs,
+              Location.({txt: "bs.optional", loc: Location.none}, PStr([])),
+              // ...extraAttrs,
             ];
             Type.field(
               ~attrs,
@@ -649,116 +681,65 @@ let print = schema => {
         );
       resetPrefixes();
 
-      Str.type_(Recursive, [abstractRecord("t", labels)]);
+      [%str
+        %s
+        [Str.type_(Recursive, [abstractRecord("t", labels)])]
+      ];
     };
 
   let directives =
     switch (state.directives) {
-    | _ => Str.type_(Recursive, [abstractRecord("t", state.directives)])
-    };
-  let fields =
-    switch (state.fields) {
-    | _ =>
-      Str.type_(
-        Recursive,List.flatten([state.unions, state.interfaces, state.fields]),
-      )
+    | [] => [%str]
+    | _ => [%str
+        %s
+        [Str.type_(Recursive, [abstractRecord("t", state.directives)])]
+      ]
     };
 
-  // let unions_helpers = List.map(e=> [%stri e],state.unions_helpers);
-  // let makeSchemaBody =     [directives, enums, inputs, fields, ...state.unions_helpers];
-
-  let code0 = [%str
+  let code = [%str
     module type SchemaConfig = {
-      module Scalars: [%m
-        [%expr
-          [%e
-            {
-              pmty_desc: Pmty_signature(state.scalars),
-              pmty_loc: loc,
-              pmty_attributes: [],
-            }
-          ]
-        ]
-      ];
+      module Scalars: {[%%s state.scalars];};
       type resolver('parent, 'payload, 'fieldType, 'result);
       type directiveResolver('payload);
+    };
+    module MakeSchema = (Config: SchemaConfig) => {
+      include Config.Scalars;
+      type rootResolver('payload, 'fieldType, 'result) =
+        Config.resolver(unit, 'payload, 'fieldType, 'result);
+      type directiveResolver('payload) = Config.directiveResolver('payload);
+
+      %s
+      enums;
+      %s
+      inputs;
+      %s
+      fields;
+      %s
+      state.unions_helpers;
+
+      module Query = {
+        %s
+        queries;
+      };
+      module Mutation = {
+        %s
+        mutations;
+      };
+      module Subscription = {
+        %s
+        subscriptions;
+      };
+      module Directives = {
+        %s
+        directives;
+      };
+      %s
+      resolvers;
+      %s
+      used_resolvers;
     }
   ];
-  let code = [%str
-    include Config.Scalars;
-    type rootResolver('payload, 'fieldType, 'result) =
-      Config.resolver(unit, 'payload, 'fieldType, 'result);
-    type directiveResolver('payload) = Config.directiveResolver('payload)
-  ];
-  let code =
-    List.append(
-      code,
-      [ enums],
-    );
-  let code =
-    List.append(
-      code,
-      [inputs],
-    );
-
-  let code =
-    List.append(
-      code,
-      [ fields, ...state.unions_helpers],
-    );
-
-  let code =
-    List.append(
-      code,
-      [%str
-        module Query = {
-          %i
-          queries;
-        };
-        module Mutation = {
-          %i
-          mutations;
-        };
-        module Subscription = {
-          %i
-          subscriptions;
-        };
-        module Directives = {
-          %i
-          directives;
-        }
-        // %i
-        // [%stri resolvers];
-        // [%str used_resolvers];
-      ],
-    );
-  let code =
-    List.append(
-      code,
-     resolvers,
-    );
-  let code =
-    List.append(
-      code,
-     [used_resolvers],
-    );
-
-let code2 = [%stri
-    module MakeSchema = (Config: SchemaConfig) => [%m
-        [%expr
-          [%e
-            {
-               pmod_desc: Pmod_structure(code),
-            pmod_loc: Location.none,
-            pmod_attributes: [],
-            }
-          ]
-        ]
-      ];];
-  // let code2 = [%stri
-  //   module MakeSchema = (Config: SchemaConfig) => {}
-  // ];
-  let code = List.append(code0, [code2]);
   let comments = [];
+
   (code, comments);
 };

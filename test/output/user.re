@@ -8,97 +8,66 @@ module MakeSchema = (Config: SchemaConfig) => {
   type rootResolver('payload, 'fieldType, 'result) =
     Config.resolver(unit, 'payload, 'fieldType, 'result);
   type directiveResolver('payload) = Config.directiveResolver('payload);
-  [@bs.deriving {jsConverter: newType}]
-  type userTypes = [
-    | [@bs.as "SuperUser"] `SuperUser
-    | [@bs.as "Administrator"] `Administrator
-    | [@bs.as "Customer"] `Customer
-  ];
-  [@bs.deriving {jsConverter: newType}]
-  type gender = [
-    | [@bs.as "Male"] `Male
-    | [@bs.as "Female"] `Female
-    | [@bs.as "NonBinary"] `NonBinary
-  ];
-  type wrapper = {foo: Js.Nullable.t(string)}
+  type userTypes = [ | `SuperUser | `Administrator | `Customer]
+  and gender = [ | `Male | `Female | `NonBinary];
+  type wrapper = {foo: option(string)}
   and genderInput = {
     check: bool,
-    another: Js.Nullable.t(string),
-    listOfStrings: array(Js.Nullable.t(string)),
-    nullableListOfStrings: Js.Nullable.t(array(Js.Nullable.t(string))),
+    another: option(string),
+    listOfStrings: array(option(string)),
+    nullableListOfStrings: option(array(option(string))),
     wrapper,
-    gender: Js.Nullable.t(gender),
+    gender: option(gender),
   };
   type userLike = {. "name": string}
-  and query = {user: Js.Nullable.t(user)}
+  and query = {user: option(user)}
   and user = {
     name: string,
     email: string,
-    gender: Js.Nullable.t(gender),
-    listNullable: Js.Nullable.t(array(Js.Nullable.t(string))),
-    list: array(Js.Nullable.t(string)),
+    gender: option(gender),
+    listNullable: option(array(option(string))),
+    list: array(option(string)),
     getGender: gender,
     self: user,
   };
   module Query = {
-    [@bs.deriving abstract]
-    type t = {
-      [@bs.optional]
-      user: rootResolver(unit, user, Js.Nullable.t(user)),
-    };
+    type t = {user: rootResolver(unit, user, option(user))};
   };
-  module Mutation = {};
-  module Subscription = {};
+  module Mutation = {
+    type t = {};
+  };
+  module Subscription = {
+    type t = {};
+  };
   module Directives = {
-    [@bs.deriving abstract]
     type t = {
-      [@bs.optional] [@bs.as "include"]
+      [@bs.as "include"]
       include_: directiveResolver({. "if": bool}),
-      [@bs.optional]
       skip: directiveResolver({. "if": bool}),
-      [@bs.optional]
-      deprecated: directiveResolver({. "reason": Js.Nullable.t(string)}),
-      [@bs.optional]
+      deprecated: directiveResolver({. "reason": option(string)}),
       specifiedBy: directiveResolver({. "url": string}),
     };
   };
   module User = {
-    [@bs.deriving abstract]
     type t = {
-      [@bs.optional]
       name: Config.resolver(user, unit, string, string),
-      [@bs.optional]
       email: Config.resolver(user, unit, string, string),
-      [@bs.optional]
-      gender: Config.resolver(user, unit, gender, Js.Nullable.t(gender)),
-      [@bs.optional]
+      gender: Config.resolver(user, unit, gender, option(gender)),
       listNullable:
-        Config.resolver(
-          user,
-          unit,
-          string,
-          Js.Nullable.t(array(Js.Nullable.t(string))),
-        ),
-      [@bs.optional]
-      list:
-        Config.resolver(user, unit, string, array(Js.Nullable.t(string))),
-      [@bs.optional]
+        Config.resolver(user, unit, string, option(array(option(string)))),
+      list: Config.resolver(user, unit, string, array(option(string))),
       getGender:
         Config.resolver(
           user,
-          {. "check": Js.Nullable.t(genderInput)},
+          {. "check": option(genderInput)},
           gender,
           gender,
         ),
-      [@bs.optional]
       self: Config.resolver(user, {. "check": bool}, user, user),
     };
   };
-  [@bs.deriving abstract]
   type t = {
-    [@bs.optional] [@bs.as "User"]
     user: User.t,
-    [@bs.optional] [@bs.as "Query"]
     query: Query.t,
   };
 };
