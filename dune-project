@@ -1,4 +1,2 @@
-(lang dune 2.0)
-
-(formatting
- (enabled_for reason))
+(lang dune 1.7)
+(name graphql-to-reason)

@@ -29,10 +29,10 @@ let uncap_key =
   fun
   | "ID" => "id"
   | "JSON" => "json"
+  | "CSS" => "css"
   | s => uncap(s);
 
 let closed_js_t = fields => {
-  // let x =Ptype_record(fields);
   Typ.constr(
     {txt: Longident.parse("Js.t"), loc: Location.none},
     [Typ.object_(fields, Closed)],
@@ -52,24 +52,27 @@ let fieldName = (key: string) =>
     key;
   };
 let resetFieldNames = () => Hashtbl.clear(fieldNames);
- let filterList = (l,getKey)=> {
-   resetFieldNames();
-   List.filter((a) => {
-   let x= getKey(a)
-  switch (Hashtbl.find(fieldNames, x)) {
-  | counter =>
-    Hashtbl.add(fieldNames, x, counter + 1);
-    false;
-  | exception Not_found =>
-    Hashtbl.add(fieldNames, x, 1);
-    true;
-  };
-          },l)
- }
- let filterList = (l,getKey)=> {
-   resetFieldNames();
-   List.filter((a) => true,l)
- }
+let filterList = (l, getKey) => {
+  resetFieldNames();
+  List.filter(
+    a => {
+      let x = getKey(a);
+      switch (Hashtbl.find(fieldNames, x)) {
+      | counter =>
+        Hashtbl.add(fieldNames, x, counter + 1);
+        false;
+      | exception Not_found =>
+        Hashtbl.add(fieldNames, x, 1);
+        true;
+      };
+    },
+    l,
+  );
+};
+let filterList = (l, getKey) => {
+  resetFieldNames();
+  List.filter(a => true, l);
+};
 let prefix = (key: string) =>
   switch (Hashtbl.find(prefixes, key)) {
   | counter =>
@@ -81,7 +84,6 @@ let prefix = (key: string) =>
   };
 
 let resetPrefixes = () => Hashtbl.clear(prefixes);
-
 
 let escape_id = key => {
   let originalKey = uncap_key(key);
@@ -143,11 +145,7 @@ let escape_id = key => {
         ),
       ],
     )
-  | originalKey when originalKey != key => (
-      originalKey,
-      [
-      ],
-    )
+  | originalKey when originalKey != key => (originalKey, [])
   | originalKey => (originalKey, [])
   };
 };
@@ -168,31 +166,17 @@ let gql_type = key =>
 let abstractRecord = (name, labels) =>
   Type.mk(
     ~kind=Ptype_record(labels),
-    ~attrs=[
-      // ({txt: "bs.deriving", loc: Location.none}, PStr([%str abstract])),
-    ],
+    ~attrs=[],
     {Location.txt: name, loc: Location.none},
   );
 
 let enum = (name, strings) =>
   Type.mk(
     ~kind=Ptype_abstract,
-    ~attrs=[
-
-    ],
+    ~attrs=[],
     ~manifest=
       Typ.variant(
-        List.map(
-          name =>
-            Rtag(
-              name,
-              [
-              ],
-              true,
-              [],
-            ),
-          strings,
-        ),
+        List.map(name => Rtag(name, [], true, []), strings),
         Closed,
         None,
       ),
@@ -218,7 +202,7 @@ let print = schema => {
 
   let uncap_key_resolver = s =>
     switch (Schema.lookup_type(schema, s)) {
-    | Some(Enum(_)) =>  uncap_key(s)
+    | Some(Enum(_)) => uncap_key(s)
     | None => uncap(s)
     | Some(Scalar(_))
     | Some(Object(_))
@@ -235,28 +219,27 @@ let print = schema => {
     }
   and print_type_ref = (~uncap_key=uncap_key, tm) =>
     switch (tm) {
-    | Named(name) => [%type:
-        option([%t name |> uncap_key |> gql_type])
-      ]
+    | Named(name) => [%type: option([%t name |> uncap_key |> gql_type])]
     | NonNull(tr) => print_type_ref_nonNullable(~uncap_key, tr)
     | List(tr) => [%type:
         option(array([%t print_type_ref(~uncap_key, tr)]))
       ]
     };
 
-  let rec print_field_type_name = (~uncap_key=uncap_key, tm) =>
-    switch (tm) {
-    | Named(name) => name |> uncap_key |> gql_type
-    | NonNull(tr)
-    | List(tr) => print_field_type_name(~uncap_key, tr)
-    };
+  //  let rec print_field_type_name = (~uncap_key=uncap_key, tm) =>
+  //    switch (tm) {
+  //    | Named(name) => name |> uncap_key |> gql_type
+  //    | NonNull(tr)
+  //    | List(tr) => print_field_type_name(~uncap_key, tr)
+  //    };
 
   let rec print_fields = (name, fields) =>
     Type.mk(
       ~kind=Ptype_record(print_record_fields(fields)),
       {Location.txt: name |> uncap_key, loc: Location.none},
     )
-  and print_record_fields = fields => List.map(print_record_field, filterList(fields,a=>a.fm_name))
+  and print_record_fields = fields =>
+    List.map(print_record_field, filterList(fields, a => a.fm_name))
   and print_record_field = ({fm_name, fm_field_type, _}) => {
     let (key, extraAttrs) = escape_id(fm_name);
     let key = prefix(key);
@@ -266,49 +249,30 @@ let print = schema => {
       print_type_ref(fm_field_type),
     );
   }
-  // and print_record_args = fields => List.map(print_record_arg, fields)
-  // and print_record_arg = ({am_name, am_arg_type, _}) => {
-  //   let (key, extraAttrs) = escape_id(am_name);
-  //   let key = prefix(key);
 
-  //   Type.field({Location.txt: key, loc: Location.none}, print_type_ref(am_arg_type));
-  // }
   and print_root_resolver = fields =>
     List.map(
       ({fm_name, fm_arguments, fm_field_type, _}) => {
         let (key, extraAttrs) = escape_id(fm_name);
         let key = prefix(key);
         Type.field(
-          ~attrs=[
-            // ({txt: "bs.optional", loc: Location.none}, PStr([])),
-            ...extraAttrs,
-          ],
+          ~attrs=extraAttrs,
           {Location.txt: key, loc: Location.none},
           Typ.constr(
             {txt: Longident.parse("rootResolver"), loc: Location.none},
             [
               switch (fm_arguments) {
               | [] => [%type: unit]
-              // | _ => print_field_type_name(fm_field_type)
-              //         {
-              //           // let cc =print_record_args(fm_arguments);
-              //         // let ccc= Ptype_record(cc);
-              //       // let cc =
-              //       //     List.map(
-              //       //       ({am_name, am_arg_type, _}) =>
-              //       //         print_field_type_name(am_arg_type),
-              //       //       fm_arguments,
-              //       //     );
-              //         // Typ.constr(
-              //         //   {txt: Longident.Lident(key), loc: Location.none},
-              //         //   cc,
-              //         // );
-              //         //  [%type: unit];
-              // print_field_type_name(fm_field_type)
-              //          }
               | _ => closed_js_t(List.map(print_arg, fm_arguments))
               },
-              print_field_type_name(fm_field_type),
+              Typ.constr(
+                {txt: Longident.Lident("Config.ctx"), loc: Location.none},
+                [],
+              ),
+              Typ.constr(
+                {txt: Longident.Lident("Config.info"), loc: Location.none},
+                [],
+              ),
               print_type_ref(fm_field_type),
             ],
           ),
@@ -323,13 +287,13 @@ let print = schema => {
         let key = prefix(key);
 
         Type.field(
-          ~attrs=[
-            // ({txt: "bs.optional", loc: Location.none}, PStr([])),
-            ...extraAttrs,
-          ],
+          ~attrs=extraAttrs,
           {Location.txt: key, loc: Location.none},
           Typ.constr(
-            {txt: Longident.parse("Config.resolver"), loc: Location.none},
+            {
+              txt: Longident.parse("Config.fieldResolver"),
+              loc: Location.none,
+            },
             [
               Typ.constr(
                 {txt: Longident.Lident(parent), loc: Location.none},
@@ -339,7 +303,15 @@ let print = schema => {
               | [] => [%type: unit]
               | _ => closed_js_t(List.map(print_arg, fm_arguments))
               },
-              print_field_type_name(fm_field_type),
+              Typ.constr(
+                {txt: Longident.Lident("Config.ctx"), loc: Location.none},
+                [],
+              ),
+              Typ.constr(
+                {txt: Longident.Lident("Config.info"), loc: Location.none},
+                [],
+              ),
+              // print_field_type_name(fm_field_type),
               print_type_ref(fm_field_type),
             ],
           ),
@@ -353,10 +325,7 @@ let print = schema => {
 
     [
       Type.field(
-        ~attrs=[
-          // ({txt: "bs.optional", loc: Location.none}, PStr([])),
-          ...extraAttrs,
-        ],
+        ~attrs=extraAttrs,
         {Location.txt: key, loc: Location.none},
         Typ.constr(
           {txt: Longident.parse("directiveResolver"), loc: Location.none},
@@ -389,7 +358,15 @@ let print = schema => {
     | isPrivate when String.sub(isPrivate, 0, 2) == "__" => None
     | em_name =>
       let name = uncap_key(em_name);
-      Some(enum(name, List.map(({evm_name, _}) => evm_name, filterList(em_values,a=>a.evm_name))));
+      Some(
+        enum(
+          name,
+          List.map(
+            ({evm_name, _}) => evm_name,
+            filterList(em_values, a => a.evm_name),
+          ),
+        ),
+      );
     }
   and print_union = ({um_name, _}) =>
     Type.mk({Location.txt: uncap_key(um_name), loc: Location.none})
@@ -435,16 +412,6 @@ let print = schema => {
     )
   and print_input = ({iom_name, iom_input_fields, _}) =>
     print_args(iom_name, iom_input_fields)
-  // and print_args_list_label_decl = (name, args) => {
-  //   let (key, extraAttrs) = escape_id(name);
-  //   List.map(
-  //     ({am_name, am_arg_type, _}) => {
-  //       let (key, extraAttrs) = escape_id(am_name);
-  //       Type.field({Location.txt: key, loc: Location.none}, print_type_ref(am_arg_type));
-  //     },
-  //     args,
-  //   );
-  // }
 
   and print_arg = ({am_name, am_arg_type, _}) => (
     am_name,
@@ -477,7 +444,10 @@ let print = schema => {
         switch (String.lowercase_ascii(om_name)) {
         | isPrivate when String.sub(isPrivate, 0, 2) == "__" => ()
         | name =>
-          state.fields = [print_fields(om_name, filterList(om_fields,a=>a.fm_name)), ...state.fields];
+          state.fields = [
+            print_fields(om_name, filterList(om_fields, a => a.fm_name)),
+            ...state.fields,
+          ];
           state.used_resolvers =
             List.append(state.used_resolvers, [om_name]);
           resetPrefixes();
@@ -496,28 +466,15 @@ let print = schema => {
                 print_root_resolver(om_fields),
               )
           | _ =>
-          let resolverType= Type.mk(
-                                        ~kind=
-                                          Ptype_record(
-                                            print_resolver(
-                                              om_name |> uncap_key,
-                                              om_fields,
-                                            ),
-                                          ),
-                                        ~attrs=[
-                                          // (
-                                          //   {
-                                          //     txt: "bs.deriving",
-                                          //     loc: Location.none,
-                                          //   },
-                                          //   PStr([%str abstract]),
-                                          // ),
-                                        ],
-                                        {
-                                          Location.txt: "t",
-                                          loc: Location.none,
-                                        },
-                                      );
+            let resolverType =
+              Type.mk(
+                ~kind=
+                  Ptype_record(
+                    print_resolver(om_name |> uncap_key, om_fields),
+                  ),
+                ~attrs=[],
+                {Location.txt: "t", loc: Location.none},
+              );
             state.resolvers =
               List.append(
                 state.resolvers,
@@ -534,12 +491,7 @@ let print = schema => {
                             Pmod_structure([
                               {
                                 pstr_desc:
-                                  Pstr_type(
-                                    Recursive,
-                                    [
-                                      resolverType,
-                                    ],
-                                  ),
+                                  Pstr_type(Recursive, [resolverType]),
                                 pstr_loc: Location.none,
                               },
                             ]),
@@ -550,7 +502,7 @@ let print = schema => {
                     pstr_loc: Location.none,
                   },
                 ],
-              )
+              );
           };
         }
 
@@ -625,10 +577,7 @@ let print = schema => {
             let (key, extraAttrs) = escape_id(name);
             let key = prefix(key);
 
-            let attrs = [
-              // Location.({txt: "bs.optional", loc: Location.none}, PStr([])),
-              ...extraAttrs,
-            ];
+            let attrs = extraAttrs;
             Type.field(
               ~attrs,
               {Location.txt: key, loc: Location.none},
@@ -660,12 +609,10 @@ let print = schema => {
     switch (state.fields) {
     | _ =>
       Str.type_(
-        Recursive,List.flatten([state.unions, state.interfaces, state.fields]),
+        Recursive,
+        List.flatten([state.unions, state.interfaces, state.fields]),
       )
     };
-
-  // let unions_helpers = List.map(e=> [%stri e],state.unions_helpers);
-  // let makeSchemaBody =     [directives, enums, inputs, fields, ...state.unions_helpers];
 
   let code0 = [%str
     module type SchemaConfig = {
@@ -680,32 +627,25 @@ let print = schema => {
           ]
         ]
       ];
-      type resolver('parent, 'payload, 'fieldType, 'result);
+      type ctx;
+      type info;
+      type rootValue;
+      type resolver('parent, 'payload, 'ctx, 'fieldType, 'result);
+      type fieldResolver('parent, 'vars, 'ctx, 'info, 'result);
       type directiveResolver('payload);
     }
   ];
   let code = [%str
     include Config.Scalars;
-    type rootResolver('payload, 'fieldType, 'result) =
-      Config.resolver(unit, 'payload, 'fieldType, 'result);
+    type ctx = Config.ctx;
+    type rootResolver('vars, 'ctx, 'info, 'result) =
+      Config.fieldResolver(unit, 'vars, Config.ctx, 'info, 'result);
     type directiveResolver('payload) = Config.directiveResolver('payload)
   ];
-  let code =
-    List.append(
-      code,
-      [ enums],
-    );
-  let code =
-    List.append(
-      code,
-      [inputs],
-    );
+  let code = List.append(code, [enums]);
+  let code = List.append(code, [inputs]);
 
-  let code =
-    List.append(
-      code,
-      [ fields, ...state.unions_helpers],
-    );
+  let code = List.append(code, [fields, ...state.unions_helpers]);
 
   let code =
     List.append(
@@ -727,37 +667,24 @@ let print = schema => {
           %i
           directives;
         }
-        // %i
-        // [%stri resolvers];
-        // [%str used_resolvers];
       ],
     );
-  let code =
-    List.append(
-      code,
-     resolvers,
-    );
-  let code =
-    List.append(
-      code,
-     [used_resolvers],
-    );
+  let code = List.append(code, resolvers);
+  let code = List.append(code, [used_resolvers]);
 
-let code2 = [%stri
+  let code2 = [%stri
     module MakeSchema = (Config: SchemaConfig) => [%m
-        [%expr
-          [%e
-            {
-               pmod_desc: Pmod_structure(code),
+      [%expr
+        [%e
+          {
+            pmod_desc: Pmod_structure(code),
             pmod_loc: Location.none,
             pmod_attributes: [],
-            }
-          ]
+          }
         ]
-      ];];
-  // let code2 = [%stri
-  //   module MakeSchema = (Config: SchemaConfig) => {}
-  // ];
+      ]
+    ]
+  ];
   let code = List.append(code0, [code2]);
   let comments = [];
   (code, comments);

@@ -7,19 +7,33 @@ const fs = require('fs')
 
 let arch = process.arch
 let platform = process.platform
+let platformStr = ''
 
 if (arch === 'ia32') {
   arch = 'x86'
 }
 
 if (platform === 'win32') {
-  platform = 'win'
+  platformStr = 'win'
+} else {
+  platformStr = platform
 }
 
-const filename = 'graphql-to-reason-' + platform + '-' + arch + '.exe'
+const filename = 'graphql-to-reason-' + platformStr + '-' + arch + '.exe'
 let exe = path.join(__dirname, 'bin', filename)
-const supported = fs.existsSync(exe)
+let supported = fs.existsSync(exe)
 
+if (!supported) {
+  exe = path.join(
+    __dirname,
+    '_build',
+    'install',
+    'default',
+    'bin',
+    'graphql_to_reason.exe'
+  )
+  supported = fs.existsSync(exe)
+}
 if (!supported) {
   console.error('graphql-to-reason does not support this platform :(')
   console.error('')
@@ -32,16 +46,8 @@ if (!supported) {
     'If you want graphql-to-reason to support this platform natively,'
   )
   console.error('please open an issue at our repository, linked above. Please')
-  console.error('specify that you are on the ' + platform + ' platform,')
+  console.error('specify that you are on the ' + platformStr + ' platform,')
   console.error('on the ' + arch + ' architecture.')
-  exe = path.join(
-    __dirname,
-    '_build',
-    'install',
-    'default',
-    'bin',
-    'graphql_to_reason.exe'
-  )
 }
 
 const delegate_args = process.argv.slice(2)
