@@ -554,12 +554,39 @@ let print = schema => {
 
   let mutations =
     switch (state.mutations) {
-    | _ => Str.type_(Recursive, [abstractRecord("t", state.mutations)])
+    | [] => [%str
+        module Mutation = {}
+      ]
+    | _ => [%str
+        module Mutation = {
+          %i
+          Str.type_(Recursive, [abstractRecord("t", state.mutations)]);
+        }
+      ]
     };
-
   let subscriptions =
     switch (state.subscriptions) {
-    | _ => Str.type_(Recursive, [abstractRecord("t", state.subscriptions)])
+    | [] => [%str
+        module Subscription = {}
+      ]
+    | _ => [%str
+        module Subscription = {
+          %i
+          Str.type_(Recursive, [abstractRecord("t", state.subscriptions)]);
+        }
+      ]
+    };
+  let directives =
+    switch (state.directives) {
+    | [] => [%str
+        module Directives = {}
+      ]
+    | _ => [%str
+        module Directives = {
+          %i
+          Str.type_(Recursive, [abstractRecord("t", state.directives)]);
+        }
+      ]
     };
 
   let resolvers =
@@ -601,10 +628,6 @@ let print = schema => {
       Str.type_(Recursive, [abstractRecord("t", labels)]);
     };
 
-  let directives =
-    switch (state.directives) {
-    | _ => Str.type_(Recursive, [abstractRecord("t", state.directives)])
-    };
   let fields =
     switch (state.fields) {
     | _ =>
@@ -646,7 +669,6 @@ let print = schema => {
   let code = List.append(code, [inputs]);
 
   let code = List.append(code, [fields, ...state.unions_helpers]);
-
   let code =
     List.append(
       code,
@@ -654,21 +676,16 @@ let print = schema => {
         module Query = {
           %i
           queries;
-        };
-        module Mutation = {
-          %i
-          mutations;
-        };
-        module Subscription = {
-          %i
-          subscriptions;
-        };
-        module Directives = {
-          %i
-          directives;
         }
       ],
     );
+  let code =
+    List.length(mutations) > 0 ? List.append(code, mutations) : code;
+  let code =
+    List.length(subscriptions) > 0 ? List.append(code, subscriptions) : code;
+  let code =
+    List.length(directives) > 0 ? List.append(code, directives) : code;
+
   let code = List.append(code, resolvers);
   let code = List.append(code, [used_resolvers]);
 
